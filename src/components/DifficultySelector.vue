@@ -47,7 +47,4 @@ const emit = defineEmits(['difficultyChanged']);
   justify-content: center;
 }
 
-.difficulty-toggle {
-  /* width: 100%; */
-}
 </style>
