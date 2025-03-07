@@ -4,10 +4,10 @@
       <!-- Background Image Component -->
       <LandmarkImage :src="game.currentLandmarkImagePath" />
       
-      <div style="position: absolute; bottom: 5px; left: 5px; font-size: 10px; color: white; 
+      <!-- <div style="position: absolute; bottom: 5px; left: 5px; font-size: 10px; color: white; 
             background: rgba(0,0,0,0.5); padding: 2px; z-index: 100;">
         {{ game.currentLandmarkImagePath }}
-      </div>
+      </div> -->
 
       <!-- Progress Tracker -->
       <ProgressTracker />
