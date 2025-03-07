@@ -20,6 +20,21 @@ export const useGameStore = defineStore('game', {
     avatar: 'traveler1', // Default avatar
     streakCount: 0, // Tracks consecutive correct answers
     imageExtension: 'png', // Default extension to try first
+    
+    // New properties for enhanced learning
+    questionHistory: [], // Stores recent questions to avoid repeats
+    reviewQueue: [], // Stores questions the player got wrong
+    operatorMastery: {
+      '+': { level: 1, correct: 0, incorrect: 0 },
+      '-': { level: 1, correct: 0, incorrect: 0 },
+      '×': { level: 0, correct: 0, incorrect: 0 },
+      '÷': { level: 0, correct: 0, incorrect: 0 }
+    },
+    consecutiveCorrect: 0, // Track consecutive correct answers for difficulty adjustment
+    consecutiveIncorrect: 0, // Track consecutive incorrect answers for difficulty adjustment
+    totalQuestionsAnswered: 0, // Track total questions for analytics
+    adaptiveDifficulty: 'easy', // Initial adaptive difficulty
+    
     countries: [
       { 
         name: "France", 
@@ -82,6 +97,49 @@ export const useGameStore = defineStore('game', {
       // Try to determine the right extension - in a real app, you'd check if the file exists
       // But for now, we'll use the current extension in state
       return `${basePath}.${this.imageExtension}`;
+    },
+    
+    // Get available operators based on mastery levels
+    availableOperators() {
+      const operators = [];
+      
+      // Always include addition and subtraction
+      operators.push('+', '-');
+      
+      // Include multiplication if mastery level is at least 1
+      if (this.operatorMastery['×'].level >= 1) {
+        operators.push('×');
+      }
+      
+      // Include division if mastery level is at least 1
+      if (this.operatorMastery['÷'].level >= 1) {
+        operators.push('÷');
+      }
+      
+      return operators;
+    },
+    
+    // Get number range based on adaptive difficulty
+    numberRange() {
+      const progress = this.currentCountryIndex * 5 + this.currentLandmarkIndex;
+      const baseRange = { min: 0, max: 10 };
+      
+      switch (this.adaptiveDifficulty) {
+        case 'easy':
+          return { min: 0, max: 10 };
+        case 'medium':
+          return { min: 0, max: 12 };
+        case 'hard':
+          return { min: 0, max: 20 };
+        default:
+          return baseRange;
+      }
+    },
+    
+    // Determine if we should show a review question
+    shouldShowReviewQuestion() {
+      // Show a review question every 5-10 questions if there are any in the queue
+      return this.reviewQueue.length > 0 && this.totalQuestionsAnswered % Math.floor(Math.random() * 6 + 5) === 0;
     }
   },
   actions: {
@@ -91,6 +149,158 @@ export const useGameStore = defineStore('game', {
       this.imageExtension = this.imageExtension === 'png' ? 'jpg' : 'png';
       console.log(`Trying with .${this.imageExtension} extension`);
       return this.currentLandmarkImagePath;
+    },
+    
+    // Track a question in history and update mastery
+    trackQuestion(question, isCorrect) {
+      this.totalQuestionsAnswered++;
+      
+      // Create a unique key for the question
+      const questionKey = `${question.num1}${question.operator}${question.num2}`;
+      
+      // Add to question history (limit to 30 questions)
+      this.questionHistory.push(questionKey);
+      if (this.questionHistory.length > 30) {
+        this.questionHistory.shift();
+      }
+      
+      // Update operator mastery
+      if (isCorrect) {
+        this.operatorMastery[question.operator].correct++;
+        this.consecutiveCorrect++;
+        this.consecutiveIncorrect = 0;
+        
+        // Check if we should level up this operator
+        const mastery = this.operatorMastery[question.operator];
+        if (mastery.correct >= (mastery.level + 1) * 5) {
+          mastery.level++;
+        }
+      } else {
+        this.operatorMastery[question.operator].incorrect++;
+        this.consecutiveCorrect = 0;
+        this.consecutiveIncorrect++;
+        
+        // Add the question to the review queue
+        this.reviewQueue.push({
+          ...question,
+          timestamp: Date.now()
+        });
+        
+        // Limit review queue to 20 questions
+        if (this.reviewQueue.length > 20) {
+          this.reviewQueue.shift();
+        }
+      }
+      
+      // Update adaptive difficulty based on performance
+      this.updateAdaptiveDifficulty();
+      
+      // Save game state
+      this.saveGameState();
+    },
+    
+    // Update adaptive difficulty based on performance
+    updateAdaptiveDifficulty() {
+      // Increase difficulty if player gets 5 consecutive correct answers
+      if (this.consecutiveCorrect >= 5) {
+        if (this.adaptiveDifficulty === 'easy') {
+          this.adaptiveDifficulty = 'medium';
+          this.consecutiveCorrect = 0;
+        } else if (this.adaptiveDifficulty === 'medium' && this.currentCountryIndex >= 5) {
+          this.adaptiveDifficulty = 'hard';
+          this.consecutiveCorrect = 0;
+        }
+      }
+      
+      // Decrease difficulty if player gets 3 consecutive incorrect answers
+      if (this.consecutiveIncorrect >= 3) {
+        if (this.adaptiveDifficulty === 'hard') {
+          this.adaptiveDifficulty = 'medium';
+          this.consecutiveIncorrect = 0;
+        } else if (this.adaptiveDifficulty === 'medium') {
+          this.adaptiveDifficulty = 'easy';
+          this.consecutiveIncorrect = 0;
+        }
+      }
+    },
+    
+    // Get a review question from the queue
+    getReviewQuestion() {
+      if (this.reviewQueue.length === 0) return null;
+      
+      // Sort review queue by timestamp (oldest first)
+      const sortedQueue = [...this.reviewQueue].sort((a, b) => a.timestamp - b.timestamp);
+      
+      // Get the oldest question
+      const question = sortedQueue[0];
+      
+      // Remove from review queue
+      this.reviewQueue = this.reviewQueue.filter(q => 
+        q.num1 !== question.num1 || q.operator !== question.operator || q.num2 !== question.num2
+      );
+      
+      // Return just the question data
+      return {
+        num1: question.num1,
+        num2: question.num2,
+        operator: question.operator
+      };
+    },
+    
+    // Check if a question is in recent history
+    isQuestionInHistory(question) {
+      const questionKey = `${question.num1}${question.operator}${question.num2}`;
+      return this.questionHistory.includes(questionKey);
+    },
+    
+    // Get learning hint for a specific question
+    getLearningHint(question) {
+      const { num1, num2, operator } = question;
+      
+      switch (operator) {
+        case '+':
+          if (num1 === 0 || num2 === 0) {
+            return "Adding zero to any number gives the same number.";
+          } else if (num1 === num2) {
+            return `${num1} + ${num1} is the same as ${num1} × 2.`;
+          } else {
+            return `Try breaking it down: ${num1} + ${num2} = ${num1} + ${Math.floor(num2/2)} + ${num2 - Math.floor(num2/2)}`;
+          }
+        case '-':
+          if (num2 === 0) {
+            return "Subtracting zero from any number gives the same number.";
+          } else if (num1 === num2) {
+            return "Any number minus itself equals zero.";
+          } else {
+            return `Think of it as: ${num1} - ${num2} = ? means ${num2} + ? = ${num1}`;
+          }
+        case '×':
+          if (num1 === 0 || num2 === 0) {
+            return "Any number multiplied by zero equals zero.";
+          } else if (num1 === 1 || num2 === 1) {
+            return "Multiplying by 1 gives the same number.";
+          } else if (num1 === 10 || num2 === 10) {
+            return "To multiply by 10, add a zero to the end of the number.";
+          } else if (num1 === 5 || num2 === 5) {
+            return "To multiply by 5, multiply by 10 and divide by 2.";
+          } else if (num1 === 9 || num2 === 9) {
+            return "For 9 times tables, the digits always add up to 9.";
+          } else {
+            return `Break it down: ${num1} × ${num2} = ${num1} × ${num2-1} + ${num1}`;
+          }
+        case '÷':
+          if (num1 === 0) {
+            return "Zero divided by any number (except 0) equals zero.";
+          } else if (num2 === 1) {
+            return "Any number divided by 1 equals itself.";
+          } else if (num1 === num2) {
+            return "Any number divided by itself equals 1.";
+          } else {
+            return `Think of it as: ${num1} ÷ ${num2} = ? means ${num2} × ? = ${num1}`;
+          }
+        default:
+          return "Think step by step.";
+      }
     },
     
     addTicket(correctAnswer = true) {
@@ -200,7 +410,15 @@ export const useGameStore = defineStore('game', {
         powerUpInventory: this.powerUpInventory,
         avatar: this.avatar,
         streakCount: this.streakCount,
-        imageExtension: this.imageExtension
+        imageExtension: this.imageExtension,
+        // Save new learning properties
+        questionHistory: this.questionHistory,
+        reviewQueue: this.reviewQueue,
+        operatorMastery: this.operatorMastery,
+        consecutiveCorrect: this.consecutiveCorrect,
+        consecutiveIncorrect: this.consecutiveIncorrect,
+        totalQuestionsAnswered: this.totalQuestionsAnswered,
+        adaptiveDifficulty: this.adaptiveDifficulty
       }));
     },
     
@@ -217,6 +435,20 @@ export const useGameStore = defineStore('game', {
         this.avatar = parsedState.avatar || 'traveler1';
         this.streakCount = parsedState.streakCount || 0;
         this.imageExtension = parsedState.imageExtension || 'png';
+        
+        // Load new learning properties with fallbacks
+        this.questionHistory = parsedState.questionHistory || [];
+        this.reviewQueue = parsedState.reviewQueue || [];
+        this.operatorMastery = parsedState.operatorMastery || {
+          '+': { level: 1, correct: 0, incorrect: 0 },
+          '-': { level: 1, correct: 0, incorrect: 0 },
+          '×': { level: 0, correct: 0, incorrect: 0 },
+          '÷': { level: 0, correct: 0, incorrect: 0 }
+        };
+        this.consecutiveCorrect = parsedState.consecutiveCorrect || 0;
+        this.consecutiveIncorrect = parsedState.consecutiveIncorrect || 0;
+        this.totalQuestionsAnswered = parsedState.totalQuestionsAnswered || 0;
+        this.adaptiveDifficulty = parsedState.adaptiveDifficulty || 'easy';
       }
     }
   }

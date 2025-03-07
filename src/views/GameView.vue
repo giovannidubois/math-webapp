@@ -21,7 +21,7 @@
           {{ currentLandmark }}
         </h2>
         <p class="country-name">
-          {{ game.countries[game.currentCountryIndex].name }}
+          {{ getCountryFlag(game.countries[game.currentCountryIndex].name) }} {{ game.countries[game.currentCountryIndex].name }}
         </p>
       </div>
       
@@ -32,14 +32,14 @@
         @incorrect="onIncorrectAnswer"
       />
       
-      <!-- Reset Button -->
+      <!-- Reset Button
       <v-btn 
         class="reset-btn" 
         variant="outlined" 
         @click="resetWelcomeScreen"
       >
         RESET WELCOME SCREEN
-      </v-btn>
+      </v-btn> -->
       
       <!-- Welcome Modal -->
       <WelcomeModal v-model="showWelcome" />
@@ -62,6 +62,34 @@ const showWelcome = ref(false);
 const currentLandmark = computed(() => {
   return game.countries[game.currentCountryIndex].landmarks[game.currentLandmarkIndex];
 });
+
+// Function to get country flag emoji
+function getCountryFlag(countryName) {
+  const flagMap = {
+    'France': '🇫🇷',
+    'Spain': '🇪🇸',
+    'USA': '🇺🇸',
+    'China': '🇨🇳',
+    'Italy': '🇮🇹',
+    'Turkey': '🇹🇷',
+    'Mexico': '🇲🇽',
+    'Germany': '🇩🇪',
+    'Thailand': '🇹🇭',
+    'UK': '🇬🇧',
+    'Japan': '🇯🇵',
+    'Austria': '🇦🇹',
+    'Greece': '🇬🇷',
+    'Malaysia': '🇲🇾',
+    'Russia': '🇷🇺',
+    'Canada': '🇨🇦',
+    'Poland': '🇵🇱',
+    'Netherlands': '🇳🇱',
+    'Portugal': '🇵🇹',
+    'South Korea': '🇰🇷'
+  };
+  
+  return flagMap[countryName] || '';
+}
 
 // Ensure the game state is loaded on component mount
 onMounted(() => {
@@ -144,7 +172,7 @@ function resetWelcomeScreen() {
 
 .country-name {
   color: rgba(255, 255, 255, 0.9);
-  font-size: 1.2rem;
+  font-size: 1.8rem;
   margin-top: 0;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }

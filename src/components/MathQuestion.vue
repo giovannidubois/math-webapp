@@ -12,6 +12,14 @@
       </div>
     </v-expand-transition>
 
+    <!-- Learning Hint (shown after incorrect answer) -->
+    <v-expand-transition>
+      <div v-if="showLearningHint" class="learning-hint-container mb-2">
+        <v-icon icon="mdi-school" color="info" class="mr-1"></v-icon>
+        <span>{{ learningHint }}</span>
+      </div>
+    </v-expand-transition>
+
     <!-- Answer Input Field -->
     <div class="answer-box-container">
       <input
@@ -21,8 +29,11 @@
         type="text"
         @keydown.enter="checkAnswer"
         @keyup="handleKeyboardInput"
+        @focus="isMobileDevice() && $event.target.blur()"
+        @click="isMobileDevice() && $event.target.blur()"
         ref="answerInput"
         autocomplete="off"
+        :readonly="isMobileDevice()"
       />
     </div>
     <!-- Feedback Message -->
@@ -40,7 +51,13 @@
       SUBMIT
     </v-btn>
 
-
+    <!-- Difficulty Indicator (for debugging) -->
+    <!-- <div class="difficulty-indicator">
+      <small>Difficulty: {{ game.adaptiveDifficulty }} | Mastery: + ({{ game.operatorMastery['+'].level }}) 
+      - ({{ game.operatorMastery['-'].level }}) 
+      × ({{ game.operatorMastery['×'].level }}) 
+      ÷ ({{ game.operatorMastery['÷'].level }})</small>
+    </div> -->
   </div>
 </template>
 
@@ -48,6 +65,12 @@
 import { ref, watch, computed, onMounted } from 'vue';
 import { useGameStore } from '../stores/gameStore';
 import Keyboard from './Keyboard.vue';
+
+// Helper function to detect mobile devices
+function isMobileDevice() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+    (window.innerWidth <= 800 && window.innerHeight <= 900);
+}
 
 const props = defineProps({
   difficulty: {
@@ -68,20 +91,22 @@ const feedbackMessage = ref('');
 const feedbackClass = ref('');
 const isIncorrect = ref(false);
 const showHint = ref(false);
+const showLearningHint = ref(false);
+const learningHint = ref('');
 const answerInput = ref(null);
 
-const question = ref(generateQuestion(props.difficulty));
+const question = ref(generateQuestion());
 
-// Focus input field when component is mounted
+// Focus input field when component is mounted, but only on non-mobile devices
 onMounted(() => {
-  if (answerInput.value) {
+  if (answerInput.value && !isMobileDevice()) {
     answerInput.value.focus();
   }
 });
 
 // Regenerate question when difficulty changes
 watch(() => props.difficulty, (newDifficulty) => {
-  question.value = generateQuestion(newDifficulty);
+  question.value = generateQuestion();
   userAnswer.value = '';
   feedbackMessage.value = '';
 });
@@ -97,6 +122,7 @@ watch(() => props.useHint, (newValue) => {
   }
 });
 
+// Get hint text based on the current question
 const hintText = computed(() => {
   switch (question.value.operator) {
     case '+':
@@ -120,78 +146,111 @@ function handleKeyboardInput(event) {
     userAnswer.value = userAnswer.value.replace(/[^0-9-]/g, '');
   }
   
-  // Re-focus input field
-  if (answerInput.value) {
+  // Re-focus input field on non-mobile devices
+  if (answerInput.value && !isMobileDevice()) {
     answerInput.value.focus();
   }
 }
 
-function generateQuestion(difficulty) {
-  let num1, num2, operators;
-  
-  switch (difficulty) {
-    case 'easy':
-      num1 = Math.floor(Math.random() * 10); // 0-9
-      num2 = Math.floor(Math.random() * 10); // 0-9
-      operators = ['+', '-'];
-      break;
-    case 'medium':
-      num1 = Math.floor(Math.random() * 12); // 0-11
-      num2 = Math.floor(Math.random() * 12); // 0-11
-      operators = ['+', '-', '×'];
-      break;
-    case 'hard':
-      num1 = Math.floor(Math.random() * 20); // 0-19
-      num2 = Math.floor(Math.random() * 12); // 0-11
-      operators = ['+', '-', '×', '÷'];
-      break;
-    default:
-      num1 = Math.floor(Math.random() * 12);
-      num2 = Math.floor(Math.random() * 12);
-      operators = ['+', '-', '×', '÷'];
-  }
-  
-  const operator = operators[Math.floor(Math.random() * operators.length)];
-  
-  // For subtraction, ensure positive results for easy and medium
-  if (operator === '-' && (difficulty === 'easy' || difficulty === 'medium')) {
-    if (num1 < num2) {
-      [num1, num2] = [num2, num1]; // Swap numbers
+// Generate a question based on current mastery and game progress
+function generateQuestion() {
+  // Check if we should show a review question
+  if (game.shouldShowReviewQuestion) {
+    const reviewQuestion = game.getReviewQuestion();
+    if (reviewQuestion) {
+      return reviewQuestion;
     }
   }
   
-  // Ensure whole number division
-  if (operator === '÷') {
-    // Ensure non-zero divisor
-    if (num2 === 0) {
-      num2 = Math.floor(Math.random() * 12) + 1; // Random number 1-9
+  // Get available operators based on mastery levels
+  const operators = game.availableOperators;
+  
+  // Generate new question
+  let attempts = 0;
+  let newQuestion;
+  
+  do {
+    attempts++;
+    let num1, num2;
+    
+    // Get number range based on adaptive difficulty
+    const range = game.numberRange;
+    
+    // Pick a random operator from available ones
+    const operator = operators[Math.floor(Math.random() * operators.length)];
+    
+    switch (operator) {
+      case '+':
+        num1 = Math.floor(Math.random() * (range.max + 1));
+        num2 = Math.floor(Math.random() * (range.max + 1));
+        break;
+      case '-':
+        // For subtraction, ensure positive results for easier difficulties
+        if (game.adaptiveDifficulty !== 'hard') {
+          num1 = Math.floor(Math.random() * (range.max + 1));
+          num2 = Math.floor(Math.random() * (num1 + 1)); // Ensure num2 <= num1
+        } else {
+          // For hard difficulty, allow negative results
+          num1 = Math.floor(Math.random() * (range.max + 1));
+          num2 = Math.floor(Math.random() * (range.max + 1));
+        }
+        break;
+      case '×':
+        // For multiplication, use smaller numbers for easier calculations
+        const multiplierRange = game.adaptiveDifficulty === 'hard' ? range.max : Math.min(range.max, 12);
+        num1 = Math.floor(Math.random() * (multiplierRange + 1));
+        num2 = Math.floor(Math.random() * (multiplierRange + 1));
+        break;
+      case '÷':
+        // Ensure division results in whole numbers
+        num2 = Math.floor(Math.random() * (range.max - 1)) + 1; // Divisor between 1 and max-1
+        const multiplier = Math.floor(Math.random() * 10) + 1; // Random multiplier
+        num1 = num2 * multiplier; // Ensures division results in a whole number
+        break;
+      default:
+        num1 = Math.floor(Math.random() * (range.max + 1));
+        num2 = Math.floor(Math.random() * (range.max + 1));
     }
     
-    // Create a dividend that is divisible by the divisor
-    // This guarantees an integer result
-    const multiplier = Math.floor(Math.random() * 10) + 1; // Random number 1-10
-    num1 = num2 * multiplier;
-  }
+    newQuestion = { num1, num2, operator };
+    
+    // Check if question is in history to avoid repeats
+    // But don't loop forever - after 10 attempts, just use the question
+    if (attempts >= 10) {
+      break;
+    }
+  } while (game.isQuestionInHistory(newQuestion));
   
-  return { num1, num2, operator };
+  return newQuestion;
 }
 
 function checkAnswer() {
   if (!userAnswer.value) return; // Prevents crashing on empty input
   
+  // Blur the input to hide mobile keyboard
+  if (answerInput.value) {
+    answerInput.value.blur();
+  }
+  
   const correctAnswer = calculateAnswer();
   const userInput = parseInt(userAnswer.value);
   
   if (userInput === correctAnswer) {
+    // Hide any learning hint if shown
+    showLearningHint.value = false;
+    
     feedbackMessage.value = '✅ Correct!';
     feedbackClass.value = 'text-success';
+    
+    // Track question and update mastery
+    game.trackQuestion(question.value, true);
     
     // Emit the correct event and pass to game store
     emit('correct');
     game.addTicket(true);
     
     userAnswer.value = '';
-    question.value = generateQuestion(props.difficulty);
+    question.value = generateQuestion();
     showHint.value = false;
     
     // Clear feedback after a delay
@@ -199,14 +258,21 @@ function checkAnswer() {
       feedbackMessage.value = '';
     }, 1500);
     
-    // Focus input again
-    if (answerInput.value) {
+    // Don't auto-focus on mobile devices
+    if (answerInput.value && !isMobileDevice()) {
       answerInput.value.focus();
     }
   } else {
     feedbackMessage.value = '❌ Incorrect, try again!';
     feedbackClass.value = 'text-error';
     isIncorrect.value = true;
+    
+    // Show learning hint after incorrect answer
+    learningHint.value = game.getLearningHint(question.value);
+    showLearningHint.value = true;
+    
+    // Track question and update mastery
+    game.trackQuestion(question.value, false);
     
     // Notify of incorrect answer
     emit('incorrect');
@@ -236,9 +302,12 @@ function handleInput(value) {
     userAnswer.value += value;
   }
   
-  // Focus the input element to allow for keyboard input right after clicking buttons
-  if (answerInput.value) {
+  // Only focus the input on non-mobile devices
+  if (answerInput.value && !isMobileDevice()) {
     answerInput.value.focus();
+  } else if (answerInput.value) {
+    // For mobile, keep the focus off to prevent keyboard from showing
+    answerInput.value.blur();
   }
 }
 
@@ -309,6 +378,20 @@ function calculateAnswer() {
   margin-top: 10px;
   color: #FF9800;
   font-weight: medium;
+}
+
+.learning-hint-container {
+  background: rgba(0, 0, 0, 0.7);
+  padding: 10px 16px;
+  border-radius: 20px;
+  margin-top: 10px;
+  margin-bottom: 16px;
+  color: white;
+  font-weight: medium;
+  max-width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+  backdrop-filter: blur(3px);
 }
 
 .shake-animation {

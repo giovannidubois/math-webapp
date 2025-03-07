@@ -138,7 +138,7 @@ function backspace() {
 }
 
 .delete-btn {
-  background: #86C5D8 !important;
+  background: rgba(0, 0, 0, 0.7) !important;
 }
 
 .delete-content {
