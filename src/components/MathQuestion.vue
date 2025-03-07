@@ -262,31 +262,34 @@ function calculateAnswer() {
 }
 
 .problem {
-  background: white;
-  padding: 16px 36px;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 14px 30px;
   border-radius: 40px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   font-size: 1.6rem;
   font-weight: bold;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   display: inline-block;
+  color: white;
+  backdrop-filter: blur(3px);
 }
 
 .answer-box-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   width: 100%;
 }
 
 .answer-input {
-  width: 100%;
-  height: 60px;
+  width: 40%;
+  height: 45px;
   border-radius: 12px;
   border: none;
   text-align: center;
   font-size: 1.5rem;
-  background: white;
+  font-weight: bold;
+  background: rgba(255, 255, 255, 0.8);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   color: #333;
   margin: 0 16px;
@@ -294,7 +297,7 @@ function calculateAnswer() {
 }
 
 .feedback-message {
-  margin-top: 10px;
+  margin-top: 8px;
   font-weight: bold;
   font-size: 1.1rem;
 }
@@ -325,9 +328,9 @@ function calculateAnswer() {
   font-size: 1.1rem !important;
   letter-spacing: 1px;
   border-radius: 30px !important;
-  background-color: #ABEBC6 !important;
+  background-color: rgba(255, 255, 255, 1) !important;
   color: #333 !important;
-  width: 60%;
+  width: 50%;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -338,4 +341,4 @@ function calculateAnswer() {
 .text-error {
   color: #F44336;
 }
-</style>  
+</style>

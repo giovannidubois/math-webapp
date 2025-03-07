@@ -9,7 +9,6 @@
           :key="num"
           class="keyboard-btn number-btn"
           variant="elevated"
-          color="primary"
           @click="press(num)"
         >
           {{ num }}
@@ -23,7 +22,6 @@
           :key="num"
           class="keyboard-btn number-btn"
           variant="elevated"
-          color="primary"
           @click="press(num)"
         >
           {{ num }}
@@ -37,7 +35,6 @@
           :key="num"
           class="keyboard-btn number-btn"
           variant="elevated"
-          color="primary"
           @click="press(num)"
         >
           {{ num }}
@@ -50,7 +47,6 @@
         <v-btn
           class="keyboard-btn function-btn"
           variant="elevated"
-          color="secondary"
           @click="press('-')"
         >
           <span class="font-weight-bold">−</span>
@@ -60,7 +56,6 @@
         <v-btn
           class="keyboard-btn number-btn"
           variant="elevated"
-          color="primary"
           @click="press(0)"
         >
           0
@@ -70,7 +65,6 @@
         <v-btn
           class="keyboard-btn delete-btn"
           variant="elevated"
-          color="error"
           @click="backspace"
         >
           <div class="delete-content">DEL</div>
@@ -120,11 +114,14 @@ function backspace() {
   height: 60px;
   border-radius: 8px;
   font-size: 1.5rem;
-  font-weight: bold;
+  
   display: flex;
   align-items: center;
   justify-content: center;
   transition: transform 0.1s, box-shadow 0.1s;
+  background: rgba(0, 0, 0, 0.7) !important;
+  color: white !important;
+  backdrop-filter: blur(3px);
 }
 
 .keyboard-btn:active {
@@ -133,23 +130,20 @@ function backspace() {
 }
 
 .number-btn {
-  background: #4A69BD;
-  color: white;
+  background: rgba(0, 0, 0, 0.6) !important;
 }
 
 .function-btn {
-  background: #5758BB;
-  color: white;
+  background: rgba(0, 0, 0, 0.7) !important;
 }
 
 .delete-btn {
-  background: #E15F41;
-  color: white;
+  background: #86C5D8 !important;
 }
 
 .delete-content {
   font-size: 1.2rem;
-  font-weight: bold;
+  
 }
 
 /* Media queries for responsive design */

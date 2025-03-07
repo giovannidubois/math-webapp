@@ -52,7 +52,7 @@ const imageStyle = computed(() => {
   
   return { 
     backgroundImage: imageLoaded.value 
-      ? `linear-gradient(rgba(125, 206, 160, 0.3), rgba(133, 193, 233, 0.3)), url(${props.src})`
+      ? `linear-gradient(rgba(125, 206, 160, 0.1), rgba(133, 193, 233, 0.3)), url(${props.src})`
       : props.fallbackGradient,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
