@@ -25,7 +25,13 @@
         autocomplete="off"
       />
     </div>
-
+    <!-- Feedback Message -->
+    <v-fade-transition>
+      <p v-if="feedbackMessage" :class="feedbackClass" class="feedback-message">
+        {{ feedbackMessage }}
+      </p>
+    </v-fade-transition>
+    
     <!-- Custom Keyboard -->
     <Keyboard @input="handleInput" />
 
@@ -34,12 +40,7 @@
       SUBMIT
     </v-btn>
 
-    <!-- Feedback Message -->
-    <v-fade-transition>
-      <p v-if="feedbackMessage" :class="feedbackClass" class="feedback-message">
-        {{ feedbackMessage }}
-      </p>
-    </v-fade-transition>
+
   </div>
 </template>
 
@@ -161,13 +162,15 @@ function generateQuestion(difficulty) {
   
   // Ensure whole number division
   if (operator === '÷') {
-    // For non-zero division
-    if (num2 === 0) num2 = 1;
-    
-    // Make divisible for easy/medium
-    if (difficulty !== 'hard') {
-      num1 = num2 * Math.floor(Math.random() * 10 + 1);
+    // Ensure non-zero divisor
+    if (num2 === 0) {
+      num2 = Math.floor(Math.random() * 12) + 1; // Random number 1-9
     }
+    
+    // Create a dividend that is divisible by the divisor
+    // This guarantees an integer result
+    const multiplier = Math.floor(Math.random() * 10) + 1; // Random number 1-10
+    num1 = num2 * multiplier;
   }
   
   return { num1, num2, operator };

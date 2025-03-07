@@ -24,14 +24,14 @@
         @incorrect="onIncorrectAnswer"
       />
       
-      <!-- Reset Button -->
+      <!-- Reset Button
       <v-btn 
         class="reset-btn" 
         variant="outlined" 
         @click="resetWelcomeScreen"
       >
         RESET WELCOME SCREEN
-      </v-btn>
+      </v-btn> -->
       
       <!-- Welcome Modal -->
       <WelcomeModal v-model="showWelcome" />
@@ -74,10 +74,6 @@ function resetWelcomeScreen() {
   showWelcome.value = true;
 }
 
-function resetWelcomeScreen() {
-  localStorage.removeItem('hasSeenWelcome');
-  showWelcome.value = true;
-}
 </script>
 
 <style scoped>
