@@ -1,6 +1,14 @@
 <template>
   <div class="game-container">
     <div class="game-screen">
+      <!-- Background Image Component -->
+      <LandmarkImage :src="game.currentLandmarkImagePath" />
+      
+      <div style="position: absolute; bottom: 5px; left: 5px; font-size: 10px; color: white; 
+            background: rgba(0,0,0,0.5); padding: 2px; z-index: 100;">
+        {{ game.currentLandmarkImagePath }}
+      </div>
+
       <!-- Progress Tracker -->
       <ProgressTracker />
       
@@ -10,7 +18,7 @@
       <!-- Landmark Info (centered in middle) -->
       <div class="landmark-content">
         <h2 class="landmark-name">
-          {{ game.countries[game.currentCountryIndex].landmarks[game.currentLandmarkIndex] }}
+          {{ currentLandmark }}
         </h2>
         <p class="country-name">
           {{ game.countries[game.currentCountryIndex].name }}
@@ -24,14 +32,14 @@
         @incorrect="onIncorrectAnswer"
       />
       
-      <!-- Reset Button
+      <!-- Reset Button -->
       <v-btn 
         class="reset-btn" 
         variant="outlined" 
         @click="resetWelcomeScreen"
       >
         RESET WELCOME SCREEN
-      </v-btn> -->
+      </v-btn>
       
       <!-- Welcome Modal -->
       <WelcomeModal v-model="showWelcome" />
@@ -40,14 +48,20 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useGameStore } from '../stores/gameStore';
 import ProgressTracker from '../components/ProgressTracker.vue';
 import MathQuestion from '../components/MathQuestion.vue';
 import WelcomeModal from '../components/WelcomeModal.vue';
+import LandmarkImage from '../components/LandmarkImage.vue';
 
 const game = useGameStore();
 const showWelcome = ref(false);
+
+// Get current landmark name
+const currentLandmark = computed(() => {
+  return game.countries[game.currentCountryIndex].landmarks[game.currentLandmarkIndex];
+});
 
 // Ensure the game state is loaded on component mount
 onMounted(() => {
@@ -73,7 +87,6 @@ function resetWelcomeScreen() {
   localStorage.removeItem('hasSeenWelcome');
   showWelcome.value = true;
 }
-
 </script>
 
 <style scoped>
@@ -88,7 +101,7 @@ function resetWelcomeScreen() {
   background-color: #f5f5f5;
 }
 
-/* Main game screen with gradient background */
+/* Main game screen */
 .game-screen {
   width: 100%;
   max-width: 400px;
@@ -101,8 +114,8 @@ function resetWelcomeScreen() {
   display: flex;
   flex-direction: column;
   position: relative;
-  background: linear-gradient(to bottom, #7DCEA0, #85C1E9);
   padding: 16px;
+  /* Background will be handled by LandmarkImage component */
 }
 
 /* Horizontal divider */
@@ -111,12 +124,14 @@ function resetWelcomeScreen() {
   background-color: rgba(255, 255, 255, 0.6);
   width: 100%;
   margin: 12px 0;
+  z-index: 1;
 }
 
 /* Landmark content styling */
 .landmark-content {
   text-align: center;
   padding: 24px 0 16px 0;
+  z-index: 1;
 }
 
 .landmark-name {
@@ -124,13 +139,14 @@ function resetWelcomeScreen() {
   font-size: 2rem;
   font-weight: bold;
   margin-bottom: 4px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .country-name {
   color: rgba(255, 255, 255, 0.9);
   font-size: 1.2rem;
   margin-top: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* Reset button */
@@ -141,97 +157,14 @@ function resetWelcomeScreen() {
   background-color: white !important;
   color: #333 !important;
   font-size: 0.9rem !important;
+  z-index: 1;
 }
 
-/* Math question styling */
+/* Make sure all components are above the background */
+.progress-tracker,
 .math-question {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.math-question-box {
-  background: white;
-  padding: 16px 36px;
-  border-radius: 40px;
-  margin: 0 auto 24px auto;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  display: inline-block;
-}
-
-.math-expression {
-  font-size: 1.6rem;
-  margin: 0;
-  font-weight: 600;
-}
-
-/* Answer input styling */
-.answer-box-container {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 24px;
-  width: 100%;
-}
-
-.answer-input {
-  width: 100%;
-  height: 60px;
-  border-radius: 12px;
-  border: none;
-  text-align: center;
-  font-size: 1.5rem;
-  background: white;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  color: #333;
-  margin: 0 16px;
-}
-
-/* Keyboard styling */
-.keyboard-layout {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 20px;
-  width: 100%;
-}
-
-.keyboard-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  width: 100%;
-}
-
-.keyboard-btn {
-  flex: 1;
-  aspect-ratio: 1/1;
-  font-size: 1.5rem !important;
-  border-radius: 12px !important;
-}
-
-.number-btn {
-  background-color: #4A69BD !important;
-}
-
-.minus-btn {
-  background-color: #5DADE2 !important;
-}
-
-.delete-btn {
-  background-color: #CB4335 !important;
-}
-
-/* Submit button */
-.submit-btn {
-  margin: 8px auto;
-  padding: 8px 32px !important;
-  font-size: 1.1rem !important;
-  letter-spacing: 1px;
-  border-radius: 30px !important;
-  background-color: #ABEBC6 !important;
-  color: #333 !important;
-  width: 60%;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+  position: relative;
 }
 
 /* Responsive media queries */

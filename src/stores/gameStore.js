@@ -19,30 +19,80 @@ export const useGameStore = defineStore('game', {
     },
     avatar: 'traveler1', // Default avatar
     streakCount: 0, // Tracks consecutive correct answers
+    imageExtension: 'png', // Default extension to try first
     countries: [
-      { name: "France", landmarks: ["Eiffel Tower", "Louvre Museum", "Notre Dame", "Mont Saint-Michel", "Palace of Versailles"] },
-      { name: "Spain", landmarks: ["Sagrada Familia", "Alhambra", "Park Güell", "Seville Cathedral", "Plaza Mayor"] },
-      { name: "USA", landmarks: ["Statue of Liberty", "Grand Canyon", "Times Square", "Golden Gate Bridge", "Yellowstone National Park"] },
-      { name: "China", landmarks: ["Great Wall", "Forbidden City", "Terracotta Army", "Shanghai Tower", "Guilin Mountains"] },
-      { name: "Italy", landmarks: ["Colosseum", "Leaning Tower of Pisa", "Venice Canals", "Pantheon", "Amalfi Coast"] },
-      { name: "Turkey", landmarks: ["Hagia Sophia", "Blue Mosque", "Cappadocia", "Pamukkale", "Ephesus"] },
-      { name: "Mexico", landmarks: ["Chichen Itza", "Teotihuacan", "Cenotes", "Frida Kahlo Museum", "Cabo Arch"] },
-      { name: "Germany", landmarks: ["Brandenburg Gate", "Neuschwanstein Castle", "Cologne Cathedral", "Berlin Wall", "Black Forest"] },
-      { name: "Thailand", landmarks: ["Grand Palace", "Wat Arun", "Phi Phi Islands", "Ayutthaya", "Floating Markets"] },
-      { name: "UK", landmarks: ["Big Ben", "Stonehenge", "Tower of London", "Buckingham Palace", "Edinburgh Castle"] },
-      { name: "Japan", landmarks: ["Mount Fuji", "Tokyo Tower", "Fushimi Inari Shrine", "Himeji Castle", "Shibuya Crossing"] },
-      { name: "Austria", landmarks: ["Schönbrunn Palace", "Hallstatt", "Belvedere Palace", "Melk Abbey", "Grossglockner"] },
-      { name: "Greece", landmarks: ["Acropolis", "Santorini", "Delphi Ruins", "Meteora", "Mykonos Windmills"] },
-      { name: "Malaysia", landmarks: ["Petronas Towers", "Langkawi Sky Bridge", "Batu Caves", "George Town", "Kinabalu Park"] },
-      { name: "Russia", landmarks: ["Red Square", "Saint Basil's Cathedral", "Hermitage Museum", "Lake Baikal", "Trans-Siberian Railway"] },
-      { name: "Canada", landmarks: ["Niagara Falls", "Banff National Park", "CN Tower", "Old Quebec", "Stanley Park"] },
-      { name: "Poland", landmarks: ["Wawel Castle", "Auschwitz", "Malbork Castle", "Warsaw Old Town", "Tatra Mountains"] },
-      { name: "Netherlands", landmarks: ["Anne Frank House", "Rijksmuseum", "Keukenhof", "Windmills of Kinderdijk", "Van Gogh Museum"] },
-      { name: "Portugal", landmarks: ["Belém Tower", "Pena Palace", "Douro Valley", "São Jorge Castle", "Benagil Cave"] },
-      { name: "South Korea", landmarks: ["Gyeongbokgung Palace", "N Seoul Tower", "Bukchon Hanok Village", "Jeju Island", "Busan Beaches"] },
+      { 
+        name: "France", 
+        id: "france",
+        landmarks: [
+          "Eiffel Tower", 
+          "Louvre Museum", 
+          "Notre Dame", 
+          "Mont Saint-Michel", 
+          "Palace of Versailles"
+        ] 
+      },
+      { 
+        name: "Spain", 
+        id: "spain",
+        landmarks: [
+          "Sagrada Familia", 
+          "Alhambra", 
+          "Park Güell", 
+          "Seville Cathedral", 
+          "Plaza Mayor"
+        ] 
+      },
+      // Keep other countries as they were
+      { name: "USA", id: "usa", landmarks: ["Statue of Liberty", "Grand Canyon", "Times Square", "Golden Gate Bridge", "Yellowstone National Park"] },
+      { name: "China", id: "china", landmarks: ["Great Wall", "Forbidden City", "Terracotta Army", "Shanghai Tower", "Guilin Mountains"] },
+      { name: "Italy", id: "italy", landmarks: ["Colosseum", "Leaning Tower of Pisa", "Venice Canals", "Pantheon", "Amalfi Coast"] },
+      { name: "Turkey", id: "turkey", landmarks: ["Hagia Sophia", "Blue Mosque", "Cappadocia", "Pamukkale", "Ephesus"] },
+      { name: "Mexico", id: "mexico", landmarks: ["Chichen Itza", "Teotihuacan", "Cenotes", "Frida Kahlo Museum", "Cabo Arch"] },
+      { name: "Germany", id: "germany", landmarks: ["Brandenburg Gate", "Neuschwanstein Castle", "Cologne Cathedral", "Berlin Wall", "Black Forest"] },
+      { name: "Thailand", id: "thailand", landmarks: ["Grand Palace", "Wat Arun", "Phi Phi Islands", "Ayutthaya", "Floating Markets"] },
+      { name: "UK", id: "uk", landmarks: ["Big Ben", "Stonehenge", "Tower of London", "Buckingham Palace", "Edinburgh Castle"] },
+      { name: "Japan", id: "japan", landmarks: ["Mount Fuji", "Tokyo Tower", "Fushimi Inari Shrine", "Himeji Castle", "Shibuya Crossing"] },
+      { name: "Austria", id: "austria", landmarks: ["Schönbrunn Palace", "Hallstatt", "Belvedere Palace", "Melk Abbey", "Grossglockner"] },
+      { name: "Greece", id: "greece", landmarks: ["Acropolis", "Santorini", "Delphi Ruins", "Meteora", "Mykonos Windmills"] },
+      { name: "Malaysia", id: "malaysia", landmarks: ["Petronas Towers", "Langkawi Sky Bridge", "Batu Caves", "George Town", "Kinabalu Park"] },
+      { name: "Russia", id: "russia", landmarks: ["Red Square", "Saint Basil's Cathedral", "Hermitage Museum", "Lake Baikal", "Trans-Siberian Railway"] },
+      { name: "Canada", id: "canada", landmarks: ["Niagara Falls", "Banff National Park", "CN Tower", "Old Quebec", "Stanley Park"] },
+      { name: "Poland", id: "poland", landmarks: ["Wawel Castle", "Auschwitz", "Malbork Castle", "Warsaw Old Town", "Tatra Mountains"] },
+      { name: "Netherlands", id: "netherlands", landmarks: ["Anne Frank House", "Rijksmuseum", "Keukenhof", "Windmills of Kinderdijk", "Van Gogh Museum"] },
+      { name: "Portugal", id: "portugal", landmarks: ["Belém Tower", "Pena Palace", "Douro Valley", "São Jorge Castle", "Benagil Cave"] },
+      { name: "South Korea", id: "south-korea", landmarks: ["Gyeongbokgung Palace", "N Seoul Tower", "Bukchon Hanok Village", "Jeju Island", "Busan Beaches"] },
     ],
   }),
+  getters: {
+    // Get the image path for the current landmark
+    currentLandmarkImagePath() {
+      const country = this.countries[this.currentCountryIndex];
+      const landmark = country.landmarks[this.currentLandmarkIndex];
+      
+      // Convert landmark name to kebab-case for the filename
+      const landmarkId = landmark
+        .toLowerCase()
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/[^\w-]/g, ''); // Remove special characters
+      
+      // Generate the base path without extension
+      const basePath = `/images/landmarks/${country.id}/${landmarkId}`;
+      
+      // Try to determine the right extension - in a real app, you'd check if the file exists
+      // But for now, we'll use the current extension in state
+      return `${basePath}.${this.imageExtension}`;
+    }
+  },
   actions: {
+    // Try to load an image with a different extension
+    tryAlternateExtension() {
+      // Toggle between png and jpg
+      this.imageExtension = this.imageExtension === 'png' ? 'jpg' : 'png';
+      console.log(`Trying with .${this.imageExtension} extension`);
+      return this.currentLandmarkImagePath;
+    },
+    
     addTicket(correctAnswer = true) {
       if (correctAnswer) {
         // Increment streak for consecutive correct answers
@@ -149,7 +199,8 @@ export const useGameStore = defineStore('game', {
         difficulty: this.difficulty,
         powerUpInventory: this.powerUpInventory,
         avatar: this.avatar,
-        streakCount: this.streakCount
+        streakCount: this.streakCount,
+        imageExtension: this.imageExtension
       }));
     },
     
@@ -165,6 +216,7 @@ export const useGameStore = defineStore('game', {
         this.powerUpInventory = parsedState.powerUpInventory || { timeFreeze: 0, hint: 0, doublePoints: 0 };
         this.avatar = parsedState.avatar || 'traveler1';
         this.streakCount = parsedState.streakCount || 0;
+        this.imageExtension = parsedState.imageExtension || 'png';
       }
     }
   }
