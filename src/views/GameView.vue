@@ -1,88 +1,52 @@
 <template>
-  <v-container class="fill-height d-flex flex-column justify-center">
-    <v-row justify="center">
-      <v-col cols="12" md="8" lg="6">
-        <!-- Game UI -->
-        <div class="game-screen">
-          <!-- Progress Tracker -->
-          <ProgressTracker />
-          <!-- Difficulty Selector -->
-          <DifficultySelector @difficulty-changed="difficultyChanged" />
-          <!-- Landmark Info -->
-          <div class="landmark-info-container">
-            <div class="landmark-image-container">
-              <img
-                :src="landmarkImagePlaceholder"
-                alt="Landmark"
-                class="landmark-image"
-              />
-            </div>
-            <h3 class="landmark-name">
-              {{ game.countries[game.currentCountryIndex].landmarks[game.currentLandmarkIndex] }}
-            </h3>
-            <p class="country-name">
-              <v-icon icon="mdi-earth" size="small" class="mr-1"></v-icon>
-              {{ game.countries[game.currentCountryIndex].name }}
-            </p>
-          </div>
-
-          <!-- ONLY ONE PowerUps Component Here
-          <PowerUps @use-hint="activateHint" @use-time-freeze="activateTimeFreeze" /> -->
-
-          <!-- Math Question Component WITHOUT PowerUps -->
-          <div class="text-center math-question">
-            <!-- Math Question Display -->
-            <h2 class="text-h5 font-weight-bold problem">
-              {{ question.num1 }} {{ question.operator }} {{ question.num2 }} =
-            </h2>
-
-            <!-- Answer Input Field -->
-            <v-text-field
-              v-model="userAnswer"
-              variant="outlined"
-              class="mt-3 answer-field"
-              hide-details
-              density="compact"
-              type="text"
-              @keydown.enter="checkAnswer"
-              readonly
-              autocomplete="off"
-            ></v-text-field>
-
-            <!-- Custom Keyboard -->
-            <Keyboard @input="handleInput" />
-
-            <!-- Submit Button -->
-            <v-btn class="mt-3 submit-btn" color="primary" @click="checkAnswer" :disabled="!userAnswer">
-              SUBMIT
-            </v-btn>
-          </div>
-          
-          <!-- Debug button to reset welcome screen (you can remove this later) -->
-          <v-btn small text color="white" class="mt-4" @click="resetWelcomeScreen">
-            Reset Welcome Screen
-          </v-btn>
-        </div>
-      </v-col>
-    </v-row>
-    
-    <!-- Welcome Modal -->
-    <WelcomeModal v-model="showWelcome" />
-  </v-container>
+  <div class="game-container">
+    <div class="game-screen">
+      <!-- Progress Tracker -->
+      <ProgressTracker />
+      
+      <!-- Divider line -->
+      <div class="divider-line"></div>
+      
+      <!-- Landmark Info (centered in middle) -->
+      <div class="landmark-content">
+        <h2 class="landmark-name">
+          {{ game.countries[game.currentCountryIndex].landmarks[game.currentLandmarkIndex] }}
+        </h2>
+        <p class="country-name">
+          {{ game.countries[game.currentCountryIndex].name }}
+        </p>
+      </div>
+      
+      <!-- Math Question Component -->
+      <MathQuestion 
+        :difficulty="game.difficulty" 
+        @correct="onCorrectAnswer" 
+        @incorrect="onIncorrectAnswer"
+      />
+      
+      <!-- Reset Button -->
+      <v-btn 
+        class="reset-btn" 
+        variant="outlined" 
+        @click="resetWelcomeScreen"
+      >
+        RESET WELCOME SCREEN
+      </v-btn>
+      
+      <!-- Welcome Modal -->
+      <WelcomeModal v-model="showWelcome" />
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useGameStore } from '../stores/gameStore';
-import Keyboard from '../components/Keyboard.vue';
 import ProgressTracker from '../components/ProgressTracker.vue';
-import PowerUps from '../components/PowerUps.vue';
-import DifficultySelector from '../components/DifficultySelector.vue';
+import MathQuestion from '../components/MathQuestion.vue';
 import WelcomeModal from '../components/WelcomeModal.vue';
 
 const game = useGameStore();
-const userAnswer = ref('');
-const question = ref({ num1: 9, num2: 2, operator: '-' });
 const showWelcome = ref(false);
 
 // Ensure the game state is loaded on component mount
@@ -95,55 +59,19 @@ onMounted(() => {
   }
 });
 
-// Placeholder for landmark images
-const landmarkImagePlaceholder = computed(() => {
-  const country = game.countries[game.currentCountryIndex].name.toLowerCase();
-  const landmark = game.countries[game.currentCountryIndex].landmarks[game.currentLandmarkIndex]
-    .toLowerCase()
-    .replace(/\s+/g, '-');
-  
-  return `https://placehold.co/150x100/3498db/ffffff?text=${country}+${landmark}`;
-});
-
-function difficultyChanged(difficulty) {
-  // Handle difficulty change
-  console.log('Difficulty changed to:', difficulty);
+function onCorrectAnswer() {
+  // Handle correct answer (already handled in MathQuestion component)
+  console.log('Correct answer received in parent');
 }
 
-function activateHint() {
-  // Handle hint activation
-  console.log('Hint activated');
+function onIncorrectAnswer() {
+  // Handle incorrect answer (already handled in MathQuestion component)
+  console.log('Incorrect answer received in parent');
 }
 
-function activateTimeFreeze() {
-  // Handle time freeze activation
-  console.log('Time freeze activated');
-}
-
-function handleInput(value) {
-  if (value === 'delete') {
-    userAnswer.value = userAnswer.value.slice(0, -1);
-  } else if (value === '-') {
-    // Handle negative sign - only add at the beginning
-    if (userAnswer.value === '') {
-      userAnswer.value = '-';
-    }
-  } else {
-    userAnswer.value += value;
-  }
-}
-
-function checkAnswer() {
-  // Simple answer checking
-  const correctAnswer = 7; // 9 - 2 = 7
-  const userInput = parseInt(userAnswer.value);
-  
-  if (userInput === correctAnswer) {
-    alert('Correct!');
-    userAnswer.value = '';
-  } else {
-    alert('Incorrect, try again!');
-  }
+function resetWelcomeScreen() {
+  localStorage.removeItem('hasSeenWelcome');
+  showWelcome.value = true;
 }
 
 function resetWelcomeScreen() {
@@ -153,73 +81,190 @@ function resetWelcomeScreen() {
 </script>
 
 <style scoped>
-/* Background */
+/* Game container */
+.game-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 0;
+  margin: 0;
+  background-color: #f5f5f5;
+}
+
+/* Main game screen with gradient background */
 .game-screen {
-  background: linear-gradient(135deg, #1abc9c, #3498db);
   width: 100%;
-  max-width: 450px;
-  border-radius: 20px;
-  text-align: center;
-  padding: 20px;
-  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  height: 100vh;
+  max-height: 800px;
   margin: 0 auto;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
   position: relative;
-  overflow: hidden;
+  background: linear-gradient(to bottom, #7DCEA0, #85C1E9);
+  padding: 16px;
 }
 
-/* Landmark Section */
-.landmark-info-container {
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.landmark-image-container {
-  width: 150px;
-  height: 100px;
-  margin: 0 auto 10px;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.landmark-image {
+/* Horizontal divider */
+.divider-line {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.6);
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  margin: 12px 0;
+}
+
+/* Landmark content styling */
+.landmark-content {
+  text-align: center;
+  padding: 24px 0 16px 0;
 }
 
 .landmark-name {
   color: white;
-  font-size: 1.2rem;
+  font-size: 2rem;
   font-weight: bold;
-  margin-bottom: 5px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  margin-bottom: 4px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .country-name {
   color: rgba(255, 255, 255, 0.9);
-  font-size: 0.9rem;
+  font-size: 1.2rem;
   margin-top: 0;
 }
 
+/* Reset button */
+.reset-btn {
+  margin: 12px auto;
+  width: 90%;
+  border-radius: 8px !important;
+  background-color: white !important;
+  color: #333 !important;
+  font-size: 0.9rem !important;
+}
+
 /* Math question styling */
-.problem {
+.math-question {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.math-question-box {
   background: white;
-  padding: 10px 20px;
-  border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 16px 36px;
+  border-radius: 40px;
+  margin: 0 auto 24px auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   display: inline-block;
 }
 
-.answer-field {
-  font-size: 1.5rem;
-  text-align: center;
-  max-width: 200px;
-  margin: auto;
+.math-expression {
+  font-size: 1.6rem;
+  margin: 0;
+  font-weight: 600;
 }
 
+/* Answer input styling */
+.answer-box-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.answer-input {
+  width: 100%;
+  height: 60px;
+  border-radius: 12px;
+  border: none;
+  text-align: center;
+  font-size: 1.5rem;
+  background: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  color: #333;
+  margin: 0 16px;
+}
+
+/* Keyboard styling */
+.keyboard-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.keyboard-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+}
+
+.keyboard-btn {
+  flex: 1;
+  aspect-ratio: 1/1;
+  font-size: 1.5rem !important;
+  border-radius: 12px !important;
+}
+
+.number-btn {
+  background-color: #4A69BD !important;
+}
+
+.minus-btn {
+  background-color: #5DADE2 !important;
+}
+
+.delete-btn {
+  background-color: #CB4335 !important;
+}
+
+/* Submit button */
 .submit-btn {
-  min-width: 120px;
-  margin-top: 16px;
+  margin: 8px auto;
+  padding: 8px 32px !important;
+  font-size: 1.1rem !important;
+  letter-spacing: 1px;
+  border-radius: 30px !important;
+  background-color: #ABEBC6 !important;
+  color: #333 !important;
+  width: 60%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive media queries */
+@media (max-width: 500px) {
+  .game-screen {
+    max-width: 100%;
+    border-radius: 0;
+    height: 100vh;
+    max-height: none;
+  }
+  
+  .keyboard-btn {
+    height: auto !important;
+  }
+}
+
+@media (min-width: 501px) and (max-width: 1024px) {
+  .game-screen {
+    max-width: 450px;
+    height: auto;
+    min-height: 700px;
+  }
+}
+
+@media (min-width: 1025px) {
+  .game-screen {
+    max-width: 450px;
+    height: auto;
+    min-height: 700px;
+  }
 }
 </style>

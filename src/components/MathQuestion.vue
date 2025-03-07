@@ -1,9 +1,9 @@
 <template>
   <div class="text-center math-question">
     <!-- Math Question Display -->
-    <h2 class="text-h5 font-weight-bold problem">
+    <div class="problem">
       {{ question.num1 }} {{ question.operator }} {{ question.num2 }} =
-    </h2>
+    </div>
 
     <v-expand-transition>
       <div v-if="showHint" class="hint-container mb-2">
@@ -13,24 +13,24 @@
     </v-expand-transition>
 
     <!-- Answer Input Field -->
-    <v-text-field
-      v-model="userAnswer"
-      variant="outlined"
-      class="mt-3 answer-field"
-      :class="{ 'shake-animation': isIncorrect }"
-      hide-details
-      density="compact"
-      type="text"
-      @keydown.enter="checkAnswer"
-      readonly
-      autocomplete="off"
-    ></v-text-field>
+    <div class="answer-box-container">
+      <input
+        v-model="userAnswer"
+        class="answer-input"
+        :class="{ 'shake-animation': isIncorrect }"
+        type="text"
+        @keydown.enter="checkAnswer"
+        @keyup="handleKeyboardInput"
+        ref="answerInput"
+        autocomplete="off"
+      />
+    </div>
 
     <!-- Custom Keyboard -->
     <Keyboard @input="handleInput" />
 
     <!-- Submit Button -->
-    <v-btn class="mt-3 submit-btn" color="primary" @click="checkAnswer" :disabled="!userAnswer">
+    <v-btn class="submit-btn" color="primary" @click="checkAnswer" :disabled="!userAnswer">
       SUBMIT
     </v-btn>
 
@@ -44,7 +44,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, onMounted } from 'vue';
 import { useGameStore } from '../stores/gameStore';
 import Keyboard from './Keyboard.vue';
 
@@ -67,8 +67,16 @@ const feedbackMessage = ref('');
 const feedbackClass = ref('');
 const isIncorrect = ref(false);
 const showHint = ref(false);
+const answerInput = ref(null);
 
 const question = ref(generateQuestion(props.difficulty));
+
+// Focus input field when component is mounted
+onMounted(() => {
+  if (answerInput.value) {
+    answerInput.value.focus();
+  }
+});
 
 // Regenerate question when difficulty changes
 watch(() => props.difficulty, (newDifficulty) => {
@@ -102,6 +110,20 @@ const hintText = computed(() => {
       return 'Think step by step';
   }
 });
+
+// Handle physical keyboard input
+function handleKeyboardInput(event) {
+  // Make sure the input only accepts numbers and minus sign
+  if (!/^[0-9-]$/.test(event.key) && event.key !== 'Backspace') {
+    // Not a number or minus or backspace - prevent by clearing invalid chars
+    userAnswer.value = userAnswer.value.replace(/[^0-9-]/g, '');
+  }
+  
+  // Re-focus input field
+  if (answerInput.value) {
+    answerInput.value.focus();
+  }
+}
 
 function generateQuestion(difficulty) {
   let num1, num2, operators;
@@ -173,6 +195,11 @@ function checkAnswer() {
     setTimeout(() => {
       feedbackMessage.value = '';
     }, 1500);
+    
+    // Focus input again
+    if (answerInput.value) {
+      answerInput.value.focus();
+    }
   } else {
     feedbackMessage.value = '❌ Incorrect, try again!';
     feedbackClass.value = 'text-error';
@@ -205,6 +232,11 @@ function handleInput(value) {
   } else {
     userAnswer.value += value;
   }
+  
+  // Focus the input element to allow for keyboard input right after clicking buttons
+  if (answerInput.value) {
+    answerInput.value.focus();
+  }
 }
 
 function calculateAnswer() {
@@ -223,20 +255,39 @@ function calculateAnswer() {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
 }
 
 .problem {
   background: white;
-  padding: 10px 20px;
-  border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 16px 36px;
+  border-radius: 40px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-size: 1.6rem;
+  font-weight: bold;
+  margin-bottom: 24px;
+  display: inline-block;
 }
 
-.answer-field {
-  font-size: 1.5rem;
+.answer-box-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.answer-input {
+  width: 100%;
+  height: 60px;
+  border-radius: 12px;
+  border: none;
   text-align: center;
-  max-width: 200px;
-  margin: auto;
+  font-size: 1.5rem;
+  background: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  color: #333;
+  margin: 0 16px;
+  padding: 0 8px;
 }
 
 .feedback-message {
@@ -266,6 +317,15 @@ function calculateAnswer() {
 
 .submit-btn {
   min-width: 120px;
+  margin: 8px auto;
+  padding: 8px 32px !important;
+  font-size: 1.1rem !important;
+  letter-spacing: 1px;
+  border-radius: 30px !important;
+  background-color: #ABEBC6 !important;
+  color: #333 !important;
+  width: 60%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .text-success {
@@ -275,4 +335,4 @@ function calculateAnswer() {
 .text-error {
   color: #F44336;
 }
-</style>
+</style>  
