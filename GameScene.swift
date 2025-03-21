@@ -4,8 +4,8 @@ import GameplayKit
 class GameScene: SKScene {
     
     // Reference to game controller
-    weak var gameViewController: GameViewController?
-    
+    weak var gameView: GameView?
+
     // Game model properties
     var currentCountry: Country!
     var currentLandmark: Landmark!
@@ -558,8 +558,8 @@ class GameScene: SKScene {
         saveProgress()
         
         // Show transition to next landmark
-        if let gameViewController = gameViewController {
-            gameViewController.presentLandmarkTransition(landmark: currentLandmark) {
+        if let gameView = gameView {
+            gameView.presentLandmarkTransition(landmark: currentLandmark) {
                 // This is called when the transition is complete
                 self.moveToNextLandmark()
             }
@@ -627,13 +627,13 @@ class GameScene: SKScene {
             saveProgress()
             
             // Reload the scene to update all visuals
-            if let gameViewController = gameViewController {
-                gameViewController.presentGameScene()
+            if let gameView = gameView {
+                gameView.presentGameScene()
             }
         } else {
             // Game completed - show main menu or completion screen
-            if let gameViewController = gameViewController {
-                gameViewController.presentMainMenu()
+            if let gameView = gameView {
+                gameView.presentMainMenu()
             }
         }
     }

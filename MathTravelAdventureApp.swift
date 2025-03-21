@@ -67,7 +67,7 @@ struct ContentView: View {
             case .mainMenu:
                 MainMenuView()
             case .game:
-                GameView()
+                SpriteGameView()
             case .progress:
                 ProgressDashboardView()
             case .settings:
@@ -274,7 +274,7 @@ struct ProgressDashboardView: View {
                 Section(header: Text("Top Landmarks")) {
                     ForEach(viewModel.topLandmarks, id: \.id) { landmark in
                         HStack {
-                            Text(landmark.name)
+                            Text(landmark.displayName)
                             Spacer()
                             Text("\(landmark.visitCount) visits")
                                 .foregroundColor(.gray)
@@ -337,9 +337,9 @@ class ProgressViewModel: ObservableObject {
         ]
         
         topLandmarks = [
-            Landmark(id: "eiffel_tower", name: "Eiffel Tower", imageName: "eiffel_tower", countryId: "france", funFact: "", visitCount: 3),
-            Landmark(id: "colosseum", name: "Colosseum", imageName: "colosseum", countryId: "italy", funFact: "", visitCount: 2),
-            Landmark(id: "pyramids", name: "Pyramids of Giza", imageName: "pyramids", countryId: "egypt", funFact: "", visitCount: 1)
+            Landmark(id: "eiffel_tower", displayName: "Eiffel Tower", imageName: "eiffel_tower", countryId: "france", funFact: "", visitCount: 3),
+            Landmark(id: "colosseum", displayName: "Colosseum", imageName: "colosseum", countryId: "italy", funFact: "", visitCount: 2),
+            Landmark(id: "pyramids", displayName: "Pyramids of Giza", imageName: "pyramids", countryId: "egypt", funFact: "", visitCount: 1)
         ]
     }
 }

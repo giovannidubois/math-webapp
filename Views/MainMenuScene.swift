@@ -3,7 +3,7 @@ import GameplayKit
 
 class MainMenuScene: SKScene {
     
-    weak var gameViewController: GameViewController?
+    weak var gameView: GameView?
     private let dataService = DataPersistenceService()
     
     override func didMove(to view: SKView) {
@@ -209,20 +209,20 @@ class MainMenuScene: SKScene {
             if let nodeName = node.name {
                 switch nodeName {
                 case "newGameButton":
-                    gameViewController?.presentGameScene()
+                    gameView?.presentGameScene()
                     break
                     
                 case "continueButton":
                     // Load saved game if available
-                    gameViewController?.presentGameScene()
+                    gameView?.presentGameScene()
                     break
                     
                 case "progressButton":
-                    gameViewController?.presentProgressDashboard()
+                    gameView?.presentProgressDashboard()
                     break
                     
                 case "settingsButton":
-                    gameViewController?.presentSettings()
+                    gameView?.presentSettings()
                     break
                     
                 default:

@@ -3,7 +3,7 @@ import GameplayKit
 
 class LandmarkTransitionScene: SKScene {
     
-    weak var gameViewController: GameViewController?
+    weak var gameView: GameView?
     var landmark: Landmark
     var completionHandler: (() -> Void)?
     private let dataService = DataPersistenceService()

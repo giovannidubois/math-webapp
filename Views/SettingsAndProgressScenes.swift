@@ -4,7 +4,7 @@ import GameplayKit
 // MARK: - Settings Scene
 class SettingsScene: SKScene {
     
-    weak var gameViewController: GameViewController?
+    weak var gameView: GameView?
     private var settings: GameSettings!
     private let dataService = DataPersistenceService()
     
@@ -249,12 +249,12 @@ class SettingsScene: SKScene {
             if let nodeName = node.name {
                 switch nodeName {
                 case "backButton":
-                    gameViewController?.presentMainMenu()
+                    gameView?.presentMainMenu()
                     return
                     
                 case "saveButton":
                     saveSettings()
-                    gameViewController?.presentMainMenu()
+                    gameView?.presentMainMenu()
                     return
                     
                 case "musicSwitch":
@@ -307,7 +307,7 @@ class SettingsScene: SKScene {
 // MARK: - Progress Dashboard Scene
 class ProgressDashboardScene: SKScene {
     
-    weak var gameViewController: GameViewController?
+    weak var gameView: GameView?
     private let dataService = DataPersistenceService()
     
     // Progress statistics
@@ -534,11 +534,11 @@ class ProgressDashboardScene: SKScene {
             if let nodeName = node.name {
                 switch nodeName {
                 case "backButton":
-                    gameViewController?.presentMainMenu()
+                    gameView?.presentMainMenu()
                     return
                     
                 case "continueButton":
-                    gameViewController?.presentGameScene()
+                    gameView?.presentGameScene()
                     return
                     
                 default:

@@ -2,18 +2,35 @@ import UIKit
 import SpriteKit
 import GameplayKit
 
-class GameViewController: UIViewController {
+// This updated class will adopt the functionality of GameView
+// But keep the GameViewController name for compatibility with storyboard
+class GameViewController: UIViewController, GameView {
     
     // Reference to the game services
-    let dataService = DataPersistenceService()
-    let questionGenerator = QuestionGeneratorService()
-    let spacedRepetition = SpacedRepetitionService()
+    private let dataService = DataPersistenceService()
+    private let questionGenerator = QuestionGeneratorService()
+    private let spacedRepetition = SpacedRepetitionService()
+    
+    // Game scene
+    private var gameScene: GameScene?
+    private var skView: SKView!
     
     // Game state properties
     var currentGameState: GameState = .mainMenu
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // Configure the view if it's not already a SKView
+        if !(self.view is SKView) {
+            skView = SKView(frame: view.bounds)
+            skView.ignoresSiblingOrder = true
+            skView.showsFPS = false
+            skView.showsNodeCount = false
+            view.addSubview(skView)
+        } else {
+            skView = self.view as? SKView
+        }
         
         // Load main menu scene first
         presentMainMenu()
@@ -22,29 +39,23 @@ class GameViewController: UIViewController {
     // MARK: - Scene Presentation Methods
     
     func presentMainMenu() {
-        if let view = self.view as? SKView {
-            let scene = MainMenuScene(size: view.bounds.size)
-            scene.gameViewController = self
-            
-            // Set the scale mode to scale to fit the window
-            scene.scaleMode = .aspectFill
-            
-            // Present the scene
-            view.presentScene(scene)
-            
-            // Only set these properties on SKView
-            view.ignoresSiblingOrder = true
-            view.showsFPS = false
-            view.showsNodeCount = false
-        }
+        let scene = MainMenuScene(size: skView.bounds.size)
+        scene.gameView = self
+        
+        // Set the scale mode to scale to fit the window
+        scene.scaleMode = .aspectFill
+        
+        // Present the scene
+        skView.presentScene(scene)
         
         currentGameState = .mainMenu
     }
     
     func presentGameScene(countryId: String? = nil, landmarkId: String? = nil) {
-        if let view = self.view as! SKView? {
-            let scene = GameScene(size: view.bounds.size)
-            scene.gameViewController = self
+        gameScene = GameScene(size: skView.bounds.size)
+        
+        if let scene = gameScene {
+            scene.gameView = self
             
             // Load saved game state if available
             if let userProgress = dataService.loadUserProgress() {
@@ -57,45 +68,39 @@ class GameViewController: UIViewController {
             }
             
             scene.scaleMode = .aspectFill
-            view.presentScene(scene, transition: SKTransition.fade(withDuration: 1.0))
+            skView.presentScene(scene, transition: SKTransition.fade(withDuration: 1.0))
         }
         
         currentGameState = .playing
     }
     
     func presentLandmarkTransition(landmark: Landmark, onComplete: @escaping () -> Void) {
-        if let view = self.view as! SKView? {
-            let scene = LandmarkTransitionScene(size: view.bounds.size, landmark: landmark)
-            scene.gameViewController = self
-            scene.completionHandler = onComplete
-            
-            scene.scaleMode = .aspectFill
-            view.presentScene(scene, transition: SKTransition.crossFade(withDuration: 0.5))
-        }
+        let scene = LandmarkTransitionScene(size: skView.bounds.size, landmark: landmark)
+        scene.gameView = self
+        scene.completionHandler = onComplete
+        
+        scene.scaleMode = .aspectFill
+        skView.presentScene(scene, transition: SKTransition.crossFade(withDuration: 0.5))
         
         currentGameState = .landmarkTransition
     }
     
     func presentProgressDashboard() {
-        if let view = self.view as! SKView? {
-            let scene = ProgressDashboardScene(size: view.bounds.size)
-            scene.gameViewController = self
-            
-            scene.scaleMode = .aspectFill
-            view.presentScene(scene, transition: SKTransition.moveIn(with: .right, duration: 0.5))
-        }
+        let scene = ProgressDashboardScene(size: skView.bounds.size)
+        scene.gameView = self
+        
+        scene.scaleMode = .aspectFill
+        skView.presentScene(scene, transition: SKTransition.moveIn(with: .right, duration: 0.5))
         
         currentGameState = .progressDashboard
     }
     
     func presentSettings() {
-        if let view = self.view as! SKView? {
-            let scene = SettingsScene(size: view.bounds.size)
-            scene.gameViewController = self
-            
-            scene.scaleMode = .aspectFill
-            view.presentScene(scene, transition: SKTransition.doorway(withDuration: 0.5))
-        }
+        let scene = SettingsScene(size: skView.bounds.size)
+        scene.gameView = self
+        
+        scene.scaleMode = .aspectFill
+        skView.presentScene(scene, transition: SKTransition.doorway(withDuration: 0.5))
         
         currentGameState = .settings
     }
