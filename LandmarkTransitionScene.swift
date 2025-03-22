@@ -1,13 +1,13 @@
 import SpriteKit
-import GameplayKit
 
 class LandmarkTransitionScene: SKScene {
     
-    weak var gameViewController: GameViewController?
-    var landmark: Landmark
-    var completionHandler: (() -> Void)?
-    private let dataService = DataPersistenceService()
+    let landmark: Landmark
     
+    // ✅ Add these two lines:
+    var completionHandler: (() -> Void)? = nil
+    
+    // Pass the landmark when initializing the scene
     init(size: CGSize, landmark: Landmark) {
         self.landmark = landmark
         super.init(size: size)
@@ -19,195 +19,94 @@ class LandmarkTransitionScene: SKScene {
     
     override func didMove(to view: SKView) {
         setupScene()
-        animateContent()
     }
     
     private func setupScene() {
-        // Background with blur effect - using the path with country folder
-        let imagePath = "\(landmark.countryId)/\(landmark.imageName)"
-        let backgroundNode = SKSpriteNode(imageNamed: imagePath)
-        backgroundNode.position = CGPoint(x: size.width/2, y: size.height/2)
+        backgroundColor = .black
+        
+        // Background image
+        let backgroundNode = SKSpriteNode(imageNamed: landmark.imageName)
+        backgroundNode.position = CGPoint(x: size.width / 2, y: size.height / 2)
         backgroundNode.size = size
-        backgroundNode.zPosition = -10
+        backgroundNode.zPosition = -1
         addChild(backgroundNode)
         
-        // Add blur effect using a dark overlay
-        let blurOverlay = SKSpriteNode(color: .black, size: size)
-        blurOverlay.position = CGPoint(x: size.width/2, y: size.height/2)
-        blurOverlay.alpha = 0.5
-        blurOverlay.zPosition = -5
-        addChild(blurOverlay)
-        
-        // Get country info for this landmark
-        let currentCountry = getCountryForLandmark()
-        
-        // Country and flag at the top (if country found)
-        if let country = currentCountry {
-            let countryInfoNode = SKNode()
-            countryInfoNode.position = CGPoint(x: size.width/2, y: size.height - 80)
-            countryInfoNode.zPosition = 2
-            countryInfoNode.alpha = 0 // Will fade in during animation
-            countryInfoNode.name = "countryInfo"
-            addChild(countryInfoNode)
-            
-            // Country flag emoji
-            let flagLabel = SKLabelNode(fontNamed: "AppleColorEmoji")
-            flagLabel.text = country.flagEmoji
-            flagLabel.fontSize = 36
-            flagLabel.position = CGPoint(x: -70, y: 0)
-            countryInfoNode.addChild(flagLabel)
-            
-            // Country name
-            let countryName = SKLabelNode(fontNamed: "Helvetica-Bold")
-            countryName.text = country.name
-            countryName.fontSize = 28
-            countryName.fontColor = .white
-            countryName.position = CGPoint(x: 20, y: 0)
-            countryInfoNode.addChild(countryName)
-        }
-        
-        // Landmark image without blur - using the path with country folder
-        let landmarkImage = SKSpriteNode(imageNamed: imagePath)
-        landmarkImage.position = CGPoint(x: size.width/2, y: size.height/2 + 50)
-        landmarkImage.setScale(0.8)
-        landmarkImage.zPosition = 1
-        // Apply rounded corners effect
-        landmarkImage.name = "landmarkImage"
-        addChild(landmarkImage)
+        // Country flag + name (emoji + name)
+        let countryLabel = SKLabelNode(fontNamed: "Helvetica-Bold")
+        countryLabel.text = "\(landmark.countryFlagEmoji) \(landmark.countryName)"
+        countryLabel.fontSize = 40
+        countryLabel.fontColor = .white
+        countryLabel.position = CGPoint(x: size.width / 2, y: size.height * 0.85)
+        countryLabel.zPosition = 2
+        addChild(countryLabel)
         
         // Landmark name
-        let nameLabel = SKLabelNode(fontNamed: "ArialRoundedMTBold")
-        nameLabel.text = landmark.displayName
-        nameLabel.fontSize = 36
-        nameLabel.fontColor = .white
-        nameLabel.position = CGPoint(x: size.width/2, y: size.height/2 - 100)
-        nameLabel.zPosition = 2
-        nameLabel.name = "nameLabel"
-        nameLabel.alpha = 0 // Will fade in
-        addChild(nameLabel)
+        let landmarkNameLabel = SKLabelNode(fontNamed: "Helvetica-Bold")
+        landmarkNameLabel.text = landmark.displayName
+        landmarkNameLabel.fontSize = 48
+        landmarkNameLabel.fontColor = .white
+        landmarkNameLabel.position = CGPoint(x: size.width / 2, y: size.height * 0.7)
+        landmarkNameLabel.zPosition = 2
+        addChild(landmarkNameLabel)
         
-        // Fun fact container
-        let factBackground = SKShapeNode(rectOf: CGSize(width: size.width - 100, height: 100), cornerRadius: 15)
+        // Fun Fact box
+        let factBoxWidth = size.width * 0.8
+        let factBoxHeight: CGFloat = 120
+        
+        let factBackground = SKShapeNode(rectOf: CGSize(width: factBoxWidth, height: factBoxHeight), cornerRadius: 16)
         factBackground.fillColor = UIColor.black.withAlphaComponent(0.6)
-        factBackground.strokeColor = .clear
-        factBackground.position = CGPoint(x: size.width/2, y: size.height/2 - 200)
+        factBackground.position = CGPoint(x: size.width / 2, y: size.height * 0.5)
         factBackground.zPosition = 2
-        factBackground.name = "factBackground"
-        factBackground.alpha = 0 // Will fade in
         addChild(factBackground)
         
-        // Fun fact text
         let factLabel = SKLabelNode(fontNamed: "Helvetica")
         factLabel.text = landmark.funFact
-        factLabel.fontSize = 18
+        factLabel.fontSize = 20
         factLabel.fontColor = .white
-        factLabel.preferredMaxLayoutWidth = size.width - 150
         factLabel.numberOfLines = 0
+        factLabel.preferredMaxLayoutWidth = factBoxWidth - 40
+        factLabel.horizontalAlignmentMode = .center
         factLabel.verticalAlignmentMode = .center
         factLabel.position = CGPoint(x: 0, y: 0)
         factLabel.zPosition = 3
         factBackground.addChild(factLabel)
         
-        // Next button
-        let buttonNode = SKShapeNode(rectOf: CGSize(width: 200, height: 60), cornerRadius: 15)
-        buttonNode.fillColor = UIColor.green
-        buttonNode.strokeColor = .white
-        buttonNode.lineWidth = 2
-        buttonNode.position = CGPoint(x: size.width/2, y: 100)
-        buttonNode.zPosition = 3
-        buttonNode.name = "nextButton"
-        buttonNode.alpha = 0 // Will fade in
-        addChild(buttonNode)
+        // Next Level button
+        let nextButtonWidth = size.width * 0.5
+        let nextButtonHeight: CGFloat = 60
         
-        let buttonLabel = SKLabelNode(fontNamed: "Helvetica-Bold")
-        buttonLabel.text = "Next Level"
-        buttonLabel.fontSize = 22
-        buttonLabel.fontColor = .white
-        buttonLabel.verticalAlignmentMode = .center
-        buttonLabel.horizontalAlignmentMode = .center
-        buttonLabel.position = CGPoint(x: 0, y: 0)
-        buttonLabel.zPosition = 4
-        buttonNode.addChild(buttonLabel)
+        let nextButton = SKShapeNode(rectOf: CGSize(width: nextButtonWidth, height: nextButtonHeight), cornerRadius: 12)
+        nextButton.fillColor = UIColor.systemGreen
+        nextButton.position = CGPoint(x: size.width / 2, y: size.height * 0.3)
+        nextButton.name = "nextButton"
+        nextButton.zPosition = 2
+        addChild(nextButton)
+        
+        let nextButtonLabel = SKLabelNode(fontNamed: "Helvetica-Bold")
+        nextButtonLabel.text = "Next Level ➔"
+        nextButtonLabel.fontSize = 24
+        nextButtonLabel.fontColor = .white
+        nextButtonLabel.verticalAlignmentMode = .center
+        nextButtonLabel.position = CGPoint(x: 0, y: 0)
+        nextButton.addChild(nextButtonLabel)
     }
     
-    private func getCountryForLandmark() -> Country? {
-        // Get all countries from the data service
-        let allCountries = getAllCountries()
-        
-        // Find the country that contains this landmark
-        return allCountries.first { $0.id == landmark.countryId }
-    }
-    
-    private func getAllCountries() -> [Country] {
-        // In a real app, this would come from your data service
-        // For now, we'll return a simple array of countries with emoji flags
-        return [
-            Country(id: "france", name: "France", flagEmoji: "🇫🇷", landmarks: [
-                "eiffel-tower", "louvre-museum", "mont-saint-michel", "notre-dame", "palace-of-versailles"
-            ], visitOrder: 1),
-            
-            Country(id: "spain", name: "Spain", flagEmoji: "🇪🇸", landmarks: [
-                "alhambra", "park-gell", "plaza-mayor", "sagrada-familia", "seville-cathedral"
-            ], visitOrder: 2),
-            
-            Country(id: "usa", name: "United States", flagEmoji: "🇺🇸", landmarks: [
-                "golden-gate-bridge", "grand-canyon", "statue-of-liberty", "times-square", "yellowstone-national-park"
-            ], visitOrder: 3),
-            
-            Country(id: "china", name: "China", flagEmoji: "🇨🇳", landmarks: [
-                "great-wall"
-            ], visitOrder: 4)
-        ]
-    }
-    
-    private func animateContent() {
-        // Animate landmark image
-        let landmarkImage = childNode(withName: "landmarkImage")
-        landmarkImage?.run(SKAction.sequence([
-            SKAction.scale(to: 0.7, duration: 0.5),
-            SKAction.scale(to: 0.75, duration: 0.5)
-        ]))
-        
-        // Fade in country info
-        let countryInfo = childNode(withName: "countryInfo")
-        countryInfo?.run(SKAction.sequence([
-            SKAction.wait(forDuration: 0.3),
-            SKAction.fadeIn(withDuration: 0.5)
-        ]))
-        
-        // Fade in name
-        let nameLabel = childNode(withName: "nameLabel")
-        nameLabel?.run(SKAction.sequence([
-            SKAction.wait(forDuration: 0.5),
-            SKAction.fadeIn(withDuration: 0.5)
-        ]))
-        
-        // Fade in fact
-        let factBackground = childNode(withName: "factBackground")
-        factBackground?.run(SKAction.sequence([
-            SKAction.wait(forDuration: 1.0),
-            SKAction.fadeIn(withDuration: 0.5)
-        ]))
-        
-        // Fade in button
-        let nextButton = childNode(withName: "nextButton")
-        nextButton?.run(SKAction.sequence([
-            SKAction.wait(forDuration: 1.5),
-            SKAction.fadeIn(withDuration: 0.5)
-        ]))
-    }
-    
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let touch = touches.first else { return }
-        let location = touch.location(in: self)
-        let nodes = self.nodes(at: location)
-        
-        for node in nodes {
-            if node.name == "nextButton" {
-                // Call completion handler to move to next level
-                completionHandler?()
-                break
+    // MARK: - Touches for Next Level Button
+    // ✅ This makes the button trigger your handler:
+        override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+            guard let touch = touches.first else { return }
+            let location = touch.location(in: self)
+
+            let nodes = self.nodes(at: location)
+            for node in nodes {
+                if node.name == "nextButton" {
+                    print("Next Level tapped!")
+
+                    // ✅ Call the completion handler if it exists
+                    completionHandler?()
+
+                    // Optional: Clear the scene or do something fancy
+                }
             }
         }
-    }
 }

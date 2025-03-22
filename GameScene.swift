@@ -71,7 +71,7 @@ class GameScene: SKScene {
         // Create a background based on current landmark
         if currentLandmark != nil {
             // Use the proper path for the landmark image based on country and landmark
-            let imagePath = "\(currentLandmark.countryId)/\(currentLandmark.imageName)"
+            let imagePath = currentLandmark.imageName.replacingOccurrences(of: ".png", with: "")
             backgroundNode = SKSpriteNode(imageNamed: imagePath)
             backgroundNode.position = CGPoint(x: size.width/2, y: size.height/2)
             backgroundNode.size = size
@@ -148,125 +148,162 @@ class GameScene: SKScene {
     }
     
     private func setupMathProblem() {
-        // Landmark name
+        let isPad = UIDevice.current.userInterfaceIdiom == .pad
+
+        // --- LANDMARK NAME ---
         landmarkNameLabel = SKLabelNode(fontNamed: "Helvetica-Bold")
         landmarkNameLabel.text = currentLandmark?.displayName ?? "Landmark"
-        landmarkNameLabel.fontSize = 32
+        landmarkNameLabel.fontSize = isPad ? 48 : 36
         landmarkNameLabel.fontColor = .white
-        landmarkNameLabel.position = CGPoint(x: size.width/2, y: size.height - 150)
+        landmarkNameLabel.position = CGPoint(x: size.width / 2, y: size.height * 0.85)
         landmarkNameLabel.zPosition = 5
         addChild(landmarkNameLabel)
-        
-        // Question background
-        let questionBackground = SKShapeNode(rectOf: CGSize(width: 300, height: 60), cornerRadius: 15)
-        questionBackground.position = CGPoint(x: size.width/2, y: size.height/2 + 50)
-        questionBackground.fillColor = UIColor.black.withAlphaComponent(0.6)
+
+        // --- QUESTION CONTAINER ---
+        let questionBoxWidth: CGFloat = isPad ? 500 : 350
+        let questionBoxHeight: CGFloat = isPad ? 100 : 80
+
+        let questionBackground = SKShapeNode(rectOf: CGSize(width: questionBoxWidth, height: questionBoxHeight), cornerRadius: questionBoxHeight / 2)
+        questionBackground.position = CGPoint(x: size.width / 2, y: size.height * 0.65)
+        questionBackground.fillColor = UIColor.black.withAlphaComponent(0.7)
         questionBackground.strokeColor = .clear
         questionBackground.zPosition = 5
         addChild(questionBackground)
-        
-        // Question text
+
+        // --- QUESTION TEXT ---
         questionLabel = SKLabelNode(fontNamed: "Helvetica-Bold")
         questionLabel.text = currentQuestion?.questionText ?? "9 + 5 = ?"
-        questionLabel.fontSize = 24
+        questionLabel.fontSize = isPad ? 56 : 40
         questionLabel.fontColor = .white
-        questionLabel.position = CGPoint(x: 0, y: -10)
+        questionLabel.verticalAlignmentMode = .center
+        questionLabel.horizontalAlignmentMode = .center
+        questionLabel.position = CGPoint(x: 0, y: 0)
         questionLabel.zPosition = 6
         questionBackground.addChild(questionLabel)
-        
-        // Answer input field
-        let answerBackground = SKShapeNode(rectOf: CGSize(width: 200, height: 50), cornerRadius: 10)
-        answerBackground.position = CGPoint(x: size.width/2, y: size.height/2 - 20)
-        answerBackground.fillColor = UIColor.white.withAlphaComponent(0.8)
-        answerBackground.strokeColor = .gray
+
+        // --- ANSWER BOX ---
+        let answerBoxWidth: CGFloat = isPad ? 400 : 300
+        let answerBoxHeight: CGFloat = isPad ? 80 : 60
+
+        let answerBackground = SKShapeNode(rectOf: CGSize(width: answerBoxWidth, height: answerBoxHeight), cornerRadius: answerBoxHeight / 2)
+        answerBackground.position = CGPoint(x: size.width / 2, y: questionBackground.position.y - answerBoxHeight * 1.5)
+        answerBackground.fillColor = UIColor.white.withAlphaComponent(0.9)
+        answerBackground.strokeColor = .blue
+        answerBackground.lineWidth = 4
         answerBackground.zPosition = 5
         addChild(answerBackground)
-        
-        // Answer text
+
+        // --- USER ANSWER TEXT ---
         userAnswerLabel = SKLabelNode(fontNamed: "Helvetica")
-        userAnswerLabel.text = ""
-        userAnswerLabel.fontSize = 24
+        userAnswerLabel.text = enteredAnswer
+        userAnswerLabel.fontSize = isPad ? 36 : 28
         userAnswerLabel.fontColor = .black
-        userAnswerLabel.position = CGPoint(x: 0, y: -8)
+        userAnswerLabel.verticalAlignmentMode = .center
+        userAnswerLabel.horizontalAlignmentMode = .center
+        userAnswerLabel.position = CGPoint(x: 0, y: 0)
         userAnswerLabel.zPosition = 6
         answerBackground.addChild(userAnswerLabel)
-        
-        // Hint label (initially hidden)
-        let hintBackground = SKShapeNode(rectOf: CGSize(width: 350, height: 60), cornerRadius: 10)
-        hintBackground.position = CGPoint(x: size.width/2, y: size.height/2 - 100)
-        hintBackground.fillColor = UIColor.blue.withAlphaComponent(0.7)
+
+        // --- HINT BACKGROUND (Initially Hidden) ---
+        let hintBoxWidth: CGFloat = isPad ? 500 : 350
+        let hintBoxHeight: CGFloat = isPad ? 80 : 60
+
+        let hintBackground = SKShapeNode(rectOf: CGSize(width: hintBoxWidth, height: hintBoxHeight), cornerRadius: hintBoxHeight / 2)
+        hintBackground.position = CGPoint(x: size.width / 2, y: answerBackground.position.y - hintBoxHeight * 1.5)
+        hintBackground.fillColor = UIColor.systemBlue.withAlphaComponent(0.7)
         hintBackground.strokeColor = .clear
         hintBackground.zPosition = 5
-        hintBackground.alpha = 0 // Initially hidden
+        hintBackground.alpha = 0 // hidden initially
+        hintBackground.name = "hintBackground"
         addChild(hintBackground)
-        
+
+        // --- HINT LABEL ---
         hintLabel = SKLabelNode(fontNamed: "Helvetica")
         hintLabel.text = currentQuestion?.hint ?? "Hint will appear here"
-        hintLabel.fontSize = 18
+        hintLabel.fontSize = isPad ? 24 : 18
         hintLabel.fontColor = .white
-        hintLabel.position = CGPoint(x: 0, y: -8)
+        hintLabel.verticalAlignmentMode = .center
+        hintLabel.horizontalAlignmentMode = .center
+        hintLabel.position = CGPoint(x: 0, y: 0)
         hintLabel.zPosition = 6
         hintBackground.addChild(hintLabel)
-        
-        // Store reference to hint background
-        hintBackground.name = "hintBackground"
     }
+
     
     private func setupKeyboard() {
-        let keyboardWidth: CGFloat = 300
-        let buttonSize: CGFloat = 70
-        let spacing: CGFloat = 10
-        let keyboardY = 150
-        
-        // Create keyboard background
-        let keyboardBackground = SKShapeNode(rectOf: CGSize(width: keyboardWidth + 40, height: 320), cornerRadius: 16)
-        keyboardBackground.position = CGPoint(x: size.width/2, y: CGFloat(keyboardY))
+        // Clear previous buttons (if resetting)
+        keyboardButtons.removeAll()
+
+        let isPad = UIDevice.current.userInterfaceIdiom == .pad
+        let buttonSize: CGFloat = isPad ? 90 : 60
+        let buttonSpacing: CGFloat = isPad ? 16 : 10
+        let keyboardPadding: CGFloat = isPad ? 40 : 20
+
+        let rows = 4
+        let cols = 3
+        let submitButtonHeight: CGFloat = isPad ? 70 : 50
+
+        // Calculate total height (keys + spacing + submit button + spacing)
+        let keysHeight = (buttonSize * CGFloat(rows)) + (buttonSpacing * CGFloat(rows - 1))
+        let keyboardHeight = keysHeight + buttonSpacing + submitButtonHeight + buttonSpacing
+
+        let keyboardWidth = (buttonSize * CGFloat(cols)) + (buttonSpacing * CGFloat(cols - 1))
+
+        // Create keyboard background container
+        let keyboardBackground = SKShapeNode(rectOf: CGSize(width: keyboardWidth + keyboardPadding, height: keyboardHeight + keyboardPadding), cornerRadius: 16)
+        keyboardBackground.position = CGPoint(x: size.width / 2, y: size.height * 0.25)
         keyboardBackground.fillColor = UIColor.black.withAlphaComponent(0.6)
         keyboardBackground.strokeColor = .clear
         keyboardBackground.zPosition = 10
         addChild(keyboardBackground)
-        
-        // Create number buttons (1-9, 0)
+
+        // Keys layout
         let keys = [
             ["1", "2", "3"],
             ["4", "5", "6"],
             ["7", "8", "9"],
             ["-", "0", "DEL"]
         ]
-        
-        for (row, rowKeys) in keys.enumerated() {
-            for (col, key) in rowKeys.enumerated() {
-                let buttonX = CGFloat(col) * (buttonSize + spacing) - keyboardWidth/2 + buttonSize/2 + 15
-                let buttonY = 120 - CGFloat(row) * (buttonSize + spacing)
-                
+
+        for (rowIndex, row) in keys.enumerated() {
+            for (colIndex, key) in row.enumerated() {
+                let posX = (-keyboardWidth / 2) + (buttonSize / 2) + CGFloat(colIndex) * (buttonSize + buttonSpacing)
+                let posY = (keyboardHeight / 2) - (buttonSize / 2) - CGFloat(rowIndex) * (buttonSize + buttonSpacing)
+
                 let button = createKeyboardButton(key: key, size: CGSize(width: buttonSize, height: buttonSize))
-                button.position = CGPoint(x: buttonX, y: buttonY)
+                button.position = CGPoint(x: posX, y: posY)
                 keyboardBackground.addChild(button)
                 keyboardButtons.append(button)
             }
         }
-        
-        // Create submit button
-        let submitButton = SKShapeNode(rectOf: CGSize(width: keyboardWidth - 20, height: 50), cornerRadius: 10)
-        submitButton.position = CGPoint(x: 0, y: -100)
+
+        // Submit button
+        let submitButtonWidth = keyboardWidth - keyboardPadding
+
+        let submitButton = SKShapeNode(rectOf: CGSize(width: submitButtonWidth, height: submitButtonHeight), cornerRadius: 10)
+        submitButton.position = CGPoint(x: 0, y: -keyboardHeight / 2 + submitButtonHeight / 2 + buttonSpacing)
         submitButton.fillColor = UIColor.gray.withAlphaComponent(0.8)
         submitButton.strokeColor = .clear
         submitButton.zPosition = 11
         submitButton.name = "submitButton"
         keyboardBackground.addChild(submitButton)
-        
+
         let submitLabel = SKLabelNode(fontNamed: "Helvetica-Bold")
         submitLabel.text = "SUBMIT"
-        submitLabel.fontSize = 20
+        submitLabel.fontSize = isPad ? 28 : 20
         submitLabel.fontColor = .white
-        submitLabel.position = CGPoint(x: 0, y: -7)
+        submitLabel.verticalAlignmentMode = .center
+        submitLabel.position = CGPoint(x: 0, y: 0)
         submitLabel.zPosition = 12
         submitButton.addChild(submitLabel)
-        
+
         keyboardButtons.append(submitButton)
     }
+
+
     
     private func createKeyboardButton(key: String, size: CGSize) -> SKNode {
+        let isPad = UIDevice.current.userInterfaceIdiom == .pad
         let button = SKShapeNode(rectOf: size, cornerRadius: 8)
         button.fillColor = UIColor.gray.withAlphaComponent(0.8)
         button.strokeColor = .clear
@@ -275,14 +312,16 @@ class GameScene: SKScene {
         
         let label = SKLabelNode(fontNamed: "Helvetica-Bold")
         label.text = key
-        label.fontSize = 24
+        label.fontSize = isPad ? 32 : 24
         label.fontColor = .white
-        label.position = CGPoint(x: 0, y: -8)
+        label.verticalAlignmentMode = .center
+        label.position = CGPoint(x: 0, y: 0)
         label.zPosition = 12
         button.addChild(label)
         
         return button
     }
+
     
     // MARK: - Touch Handling
     
@@ -414,61 +453,205 @@ class GameScene: SKScene {
         // Load landmarks based on the folder structure
         landmarks = [
             // France landmarks
-            Landmark(id: "eiffel-tower", displayName: "Eiffel Tower", imageName: "eiffel-tower.png", 
-                    countryId: "france", 
-                    funFact: "The Eiffel Tower was built for the 1889 World's Fair and was initially criticized by many French artists."),
-            Landmark(id: "louvre-museum", displayName: "Louvre Museum", imageName: "louvre-museum.png", 
-                    countryId: "france", 
-                    funFact: "The Louvre is the world's largest art museum and houses the Mona Lisa."),
-            Landmark(id: "mont-saint-michel", displayName: "Mont Saint-Michel", imageName: "mont-saint-michel.png", 
-                    countryId: "france", 
-                    funFact: "Mont Saint-Michel is a tidal island that becomes completely surrounded by water during high tides."),
-            Landmark(id: "notre-dame", displayName: "Notre-Dame Cathedral", imageName: "notre-dame.png", 
-                    countryId: "france", 
-                    funFact: "Notre-Dame's iconic rose windows contain much of the original 13th-century glass."),
-            Landmark(id: "palace-of-versailles", displayName: "Palace of Versailles", imageName: "palace-of-versailles.png", 
-                    countryId: "france", 
-                    funFact: "The Palace of Versailles has 700 rooms, 2,000 windows, and 67 staircases."),
+            Landmark(
+                id: "eiffel_tower",
+                displayName: "Eiffel Tower",
+                imageName: "eiffel_tower",
+                countryId: "france",
+                countryName: "France",
+                countryFlagEmoji: "🇫🇷",
+                funFact: "The Eiffel Tower was built for the 1889 World's Fair and was initially criticized by many French artists."
+            ),
+            Landmark(
+                id: "louvre-museum",
+                displayName: "Louvre Museum",
+                imageName: "louvre-museum.png",
+                countryId: "france",
+                countryName: "France",
+                countryFlagEmoji: "🇫🇷",
+                funFact: "The Louvre is the world's largest art museum and houses the Mona Lisa."
+            ),
+            Landmark(
+                id: "mont-saint-michel",
+                displayName: "Mont Saint-Michel",
+                imageName: "mont-saint-michel.png",
+                countryId: "france",
+                countryName: "France",
+                countryFlagEmoji: "🇫🇷",
+                funFact: "Mont Saint-Michel is a tidal island that becomes completely surrounded by water during high tides."
+            ),
+            Landmark(
+                id: "notre-dame",
+                displayName: "Notre-Dame Cathedral",
+                imageName: "notre-dame.png",
+                countryId: "france",
+                countryName: "France",
+                countryFlagEmoji: "🇫🇷",
+                funFact: "Notre-Dame's iconic rose windows contain much of the original 13th-century glass."
+            ),
+            Landmark(
+                id: "palace-of-versailles",
+                displayName: "Palace of Versailles",
+                imageName: "palace-of-versailles.png",
+                countryId: "france",
+                countryName: "France",
+                countryFlagEmoji: "🇫🇷",
+                funFact: "The Palace of Versailles has 700 rooms, 2,000 windows, and 67 staircases."
+            ),
             
             // Spain landmarks
-            Landmark(id: "alhambra", displayName: "Alhambra", imageName: "alhambra.png", 
-                    countryId: "spain", 
-                    funFact: "The Alhambra's name comes from Arabic meaning 'red castle' due to its reddish walls."),
-            Landmark(id: "park-gell", displayName: "Park Güell", imageName: "park-gell.png", 
-                    countryId: "spain", 
-                    funFact: "Park Güell was designed by architect Antoni Gaudí and features his unique mosaic work."),
-            Landmark(id: "plaza-mayor", displayName: "Plaza Mayor", imageName: "plaza-mayor.png", 
-                    countryId: "spain", 
-                    funFact: "Plaza Mayor in Madrid has hosted bullfights, markets, and even public executions in its history."),
-            Landmark(id: "sagrada-familia", displayName: "Sagrada Familia", imageName: "sagrada-familia.png", 
-                    countryId: "spain", 
-                    funFact: "The Sagrada Familia has been under construction since 1882 and is expected to be completed in 2026."),
-            Landmark(id: "seville-cathedral", displayName: "Seville Cathedral", imageName: "seville-cathedral.png", 
-                    countryId: "spain", 
-                    funFact: "Seville Cathedral is the largest Gothic cathedral in the world and contains Columbus's tomb."),
+            Landmark(
+                id: "alhambra",
+                displayName: "Alhambra",
+                imageName: "alhambra.png",
+                countryId: "spain",
+                countryName: "Spain",
+                countryFlagEmoji: "🇪🇸",
+                funFact: "The Alhambra's name comes from Arabic meaning 'red castle' due to its reddish walls."
+            ),
+            Landmark(
+                id: "park-gell",
+                displayName: "Park Güell",
+                imageName: "park-gell.png",
+                countryId: "spain",
+                countryName: "Spain",
+                countryFlagEmoji: "🇪🇸",
+                funFact: "Park Güell was designed by architect Antoni Gaudí and features his unique mosaic work."
+            ),
+            Landmark(
+                id: "plaza-mayor",
+                displayName: "Plaza Mayor",
+                imageName: "plaza-mayor.png",
+                countryId: "spain",
+                countryName: "Spain",
+                countryFlagEmoji: "🇪🇸",
+                funFact: "Plaza Mayor in Madrid has hosted bullfights, markets, and even public executions in its history."
+            ),
+            Landmark(
+                id: "sagrada-familia",
+                displayName: "Sagrada Familia",
+                imageName: "sagrada-familia.png",
+                countryId: "spain",
+                countryName: "Spain",
+                countryFlagEmoji: "🇪🇸",
+                funFact: "The Sagrada Familia has been under construction since 1882 and is expected to be completed in 2026."
+            ),
+            Landmark(
+                id: "seville-cathedral",
+                displayName: "Seville Cathedral",
+                imageName: "seville-cathedral.png",
+                countryId: "spain",
+                countryName: "Spain",
+                countryFlagEmoji: "🇪🇸",
+                funFact: "Seville Cathedral is the largest Gothic cathedral in the world and contains Columbus's tomb."
+            ),
             
             // USA landmarks
-            Landmark(id: "golden-gate-bridge", displayName: "Golden Gate Bridge", imageName: "golden-gate-bridge.png", 
-                    countryId: "usa", 
-                    funFact: "The Golden Gate Bridge's distinctive color is called 'International Orange' and was chosen for visibility in fog."),
-            Landmark(id: "grand-canyon", displayName: "Grand Canyon", imageName: "grand-canyon.png", 
-                    countryId: "usa", 
-                    funFact: "The Grand Canyon is 277 miles long, up to 18 miles wide, and over a mile deep."),
-            Landmark(id: "statue-of-liberty", displayName: "Statue of Liberty", imageName: "statue-of-liberty.png", 
-                    countryId: "usa", 
-                    funFact: "The Statue of Liberty was a gift from France to the United States in 1886."),
-            Landmark(id: "times-square", displayName: "Times Square", imageName: "times-square.png", 
-                    countryId: "usa", 
-                    funFact: "Times Square is named after The New York Times, which moved its headquarters there in 1904."),
-            Landmark(id: "yellowstone-national-park", displayName: "Yellowstone National Park", imageName: "yellowstone-national-park.png", 
-                    countryId: "usa", 
-                    funFact: "Yellowstone was the world's first national park, established in 1872."),
+            Landmark(
+                id: "golden-gate-bridge",
+                displayName: "Golden Gate Bridge",
+                imageName: "golden-gate-bridge.png",
+                countryId: "usa",
+                countryName: "United States",
+                countryFlagEmoji: "🇺🇸",
+                funFact: "The Golden Gate Bridge's distinctive color is called 'International Orange' and was chosen for visibility in fog."
+            ),
+            Landmark(
+                id: "grand-canyon",
+                displayName: "Grand Canyon",
+                imageName: "grand-canyon.png",
+                countryId: "usa",
+                countryName: "United States",
+                countryFlagEmoji: "🇺🇸",
+                funFact: "The Grand Canyon is 277 miles long, up to 18 miles wide, and over a mile deep."
+            ),
+            Landmark(
+                id: "statue-of-liberty",
+                displayName: "Statue of Liberty",
+                imageName: "statue-of-liberty.png",
+                countryId: "usa",
+                countryName: "United States",
+                countryFlagEmoji: "🇺🇸",
+                funFact: "The Statue of Liberty was a gift from France to the United States in 1886."
+            ),
+            Landmark(
+                id: "times-square",
+                displayName: "Times Square",
+                imageName: "times-square.png",
+                countryId: "usa",
+                countryName: "United States",
+                countryFlagEmoji: "🇺🇸",
+                funFact: "Times Square is named after The New York Times, which moved its headquarters there in 1904."
+            ),
+            Landmark(
+                id: "yellowstone-national-park",
+                displayName: "Yellowstone National Park",
+                imageName: "yellowstone-national-park.png",
+                countryId: "usa",
+                countryName: "United States",
+                countryFlagEmoji: "🇺🇸",
+                funFact: "Yellowstone was the world's first national park, established in 1872."
+            ),
             
             // China landmarks
-            Landmark(id: "great-wall", displayName: "Great Wall of China", imageName: "great-wall.png", 
-                    countryId: "china", 
-                    funFact: "The Great Wall of China stretches over 13,000 miles and took over 2,000 years to build.")
+            Landmark(
+                id: "great-wall",
+                displayName: "Great Wall of China",
+                imageName: "great-wall.png",
+                countryId: "china",
+                countryName: "China",
+                countryFlagEmoji: "🇨🇳",
+                funFact: "The Great Wall of China stretches over 13,000 miles and took over 2,000 years to build."
+            ),
+            
+            // Algeria landmarks (NEW!)
+            Landmark(
+                id: "casbah-of-algiers",
+                displayName: "Casbah of Algiers",
+                imageName: "casbah-of-algiers.png",
+                countryId: "algeria",
+                countryName: "Algeria",
+                countryFlagEmoji: "🇩🇿",
+                funFact: "The Casbah of Algiers is a UNESCO World Heritage site known for its unique Islamic architecture and labyrinthine alleyways."
+            ),
+            Landmark(
+                id: "m'zab-valley",
+                displayName: "M'Zab Valley",
+                imageName: "mzab-valley.png",
+                countryId: "algeria",
+                countryName: "Algeria",
+                countryFlagEmoji: "🇩🇿",
+                funFact: "M'Zab Valley is a UNESCO World Heritage site, a traditional human habitat perfectly adapted to the environment of the Sahara Desert."
+            ),
+            Landmark(
+                id: "tassili-n'ajjer",
+                displayName: "Tassili n'Ajjer",
+                imageName: "tassili-n-ajjer.png",
+                countryId: "algeria",
+                countryName: "Algeria",
+                countryFlagEmoji: "🇩🇿",
+                funFact: "Tassili n'Ajjer is famous for its prehistoric rock art and stunning sandstone landscapes in the Sahara Desert."
+            ),
+            Landmark(
+                id: "notre-dame-d'afrique",
+                displayName: "Notre-Dame d'Afrique",
+                imageName: "notre-dame-d'afrique.png",
+                countryId: "algeria",
+                countryName: "Algeria",
+                countryFlagEmoji: "🇩🇿",
+                funFact: "Notre-Dame d'Afrique is a Roman Catholic basilica in Algiers, offering panoramic views of the Bay of Algiers."
+            ),
+            Landmark(
+                id: "ghardaia",
+                displayName: "Ghardaïa",
+                imageName: "ghardaia.png",
+                countryId: "algeria",
+                countryName: "Algeria",
+                countryFlagEmoji: "🇩🇿",
+                funFact: "Ghardaïa is a historic town in the M'Zab Valley, famous for its unique architecture and traditional lifestyle."
+            )
         ]
+
         
         // Generate initial questions
         questions = questionGenerator.generateInitialQuestionSet()
@@ -695,7 +878,7 @@ class GameScene: SKScene {
         
         // Update background image - use the proper path based on country folder
         if let bgNode = backgroundNode {
-            let imagePath = "\(currentLandmark.countryId)/\(currentLandmark.imageName)"
+            let imagePath = currentLandmark.imageName.replacingOccurrences(of: ".png", with: "")
             bgNode.texture = SKTexture(imageNamed: imagePath)
         }
         

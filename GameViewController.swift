@@ -40,12 +40,11 @@ class GameViewController: UIViewController, GameView {
     
     func presentMainMenu() {
         let scene = MainMenuScene(size: skView.bounds.size)
+        
+        // Optional: if MainMenuScene uses gameView
         scene.gameView = self
         
-        // Set the scale mode to scale to fit the window
         scene.scaleMode = .aspectFill
-        
-        // Present the scene
         skView.presentScene(scene)
         
         currentGameState = .mainMenu
@@ -55,15 +54,14 @@ class GameViewController: UIViewController, GameView {
         gameScene = GameScene(size: skView.bounds.size)
         
         if let scene = gameScene {
+            // Optional: if GameScene uses gameView
             scene.gameView = self
             
-            // Load saved game state if available
             if let userProgress = dataService.loadUserProgress() {
                 scene.initializeWithProgress(userProgress)
             } else if let countryId = countryId, let landmarkId = landmarkId {
                 scene.initializeWithLandmark(countryId: countryId, landmarkId: landmarkId)
             } else {
-                // Start new game
                 scene.initializeNewGame()
             }
             
@@ -76,7 +74,10 @@ class GameViewController: UIViewController, GameView {
     
     func presentLandmarkTransition(landmark: Landmark, onComplete: @escaping () -> Void) {
         let scene = LandmarkTransitionScene(size: skView.bounds.size, landmark: landmark)
-        scene.gameView = self
+        
+        // ❌ We removed gameView because it's not needed anymore
+        // scene.gameView = self
+        
         scene.completionHandler = onComplete
         
         scene.scaleMode = .aspectFill
@@ -87,6 +88,8 @@ class GameViewController: UIViewController, GameView {
     
     func presentProgressDashboard() {
         let scene = ProgressDashboardScene(size: skView.bounds.size)
+        
+        // Optional: if ProgressDashboardScene uses gameView
         scene.gameView = self
         
         scene.scaleMode = .aspectFill
@@ -97,6 +100,8 @@ class GameViewController: UIViewController, GameView {
     
     func presentSettings() {
         let scene = SettingsScene(size: skView.bounds.size)
+        
+        // Optional: if SettingsScene uses gameView
         scene.gameView = self
         
         scene.scaleMode = .aspectFill

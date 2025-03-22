@@ -3,7 +3,7 @@ import GameplayKit
 
 class MainMenuScene: SKScene {
     
-    weak var gameViewController: GameViewController?
+    weak var gameView: GameView?
     private let dataService = DataPersistenceService()
     
     override func didMove(to view: SKView) {
@@ -13,6 +13,11 @@ class MainMenuScene: SKScene {
     private func setupScene() {
         // Set background
         backgroundColor = SKColor(red: 0.1, green: 0.3, blue: 0.6, alpha: 1.0)
+        
+        // Debug test of image
+        let testNode = SKSpriteNode(imageNamed: "eiffel-tower")
+        testNode.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        addChild(testNode)
         
         // Add world map background
         let backgroundNode = SKSpriteNode(imageNamed: "world_map_background")
@@ -113,7 +118,8 @@ class MainMenuScene: SKScene {
             addChild(previewContainer)
             
             // Landmark image - using country folder path
-            let imagePath = "\(landmark.countryId)/\(landmark.imageName)"
+            let imagePath = landmark.imageName.replacingOccurrences(of: ".png", with: "")
+            print("Attempting to load image: \(imagePath)") // Add this line
             let imageNode = SKSpriteNode(imageNamed: imagePath)
             imageNode.size = CGSize(width: previewWidth, height: previewWidth)
             imageNode.position = CGPoint(x: 0, y: 0)
@@ -209,20 +215,20 @@ class MainMenuScene: SKScene {
             if let nodeName = node.name {
                 switch nodeName {
                 case "newGameButton":
-                    gameViewController?.presentGameScene()
+                    gameView?.presentGameScene()
                     break
                     
                 case "continueButton":
                     // Load saved game if available
-                    gameViewController?.presentGameScene()
+                    gameView?.presentGameScene()
                     break
                     
                 case "progressButton":
-                    gameViewController?.presentProgressDashboard()
+                    gameView?.presentProgressDashboard()
                     break
                     
                 case "settingsButton":
-                    gameViewController?.presentSettings()
+                    gameView?.presentSettings()
                     break
                     
                 default:

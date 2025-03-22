@@ -337,9 +337,9 @@ class ProgressViewModel: ObservableObject {
         ]
         
         topLandmarks = [
-            Landmark(id: "eiffel_tower", displayName: "Eiffel Tower", imageName: "eiffel_tower", countryId: "france", funFact: "", visitCount: 3),
-            Landmark(id: "colosseum", displayName: "Colosseum", imageName: "colosseum", countryId: "italy", funFact: "", visitCount: 2),
-            Landmark(id: "pyramids", displayName: "Pyramids of Giza", imageName: "pyramids", countryId: "egypt", funFact: "", visitCount: 1)
+            Landmark(id: "eiffel_tower", displayName: "Eiffel Tower", imageName: "eiffel_tower", countryId: "france", countryName: "France", countryFlagEmoji: "🇫🇷", funFact: ""),
+            Landmark(id: "colosseum", displayName: "Colosseum", imageName: "colosseum", countryId: "italy", countryName: "Italy", countryFlagEmoji: "🇮🇹", funFact: ""),
+            Landmark(id: "pyramids", displayName: "Pyramids of Giza", imageName: "pyramids", countryId: "egypt", countryName: "Egypt", countryFlagEmoji: "🇪🇬", funFact: "")
         ]
     }
 }

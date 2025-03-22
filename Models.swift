@@ -14,16 +14,15 @@ struct Country: Identifiable, Codable {
 
 // MARK: - Landmark Model
 struct Landmark: Identifiable, Codable {
-    let id: String
-    let displayName: String // User-friendly name to display
-    let imageName: String  // Just the filename (e.g., "eiffel-tower.png")
-    let countryId: String  // Used to construct the image path: "countryId/imageName"
-    let funFact: String
-    
-    // Optional properties for more advanced features
-    var difficulty: Int = 1 // 1-5 scale
-    var visitCount: Int = 0
+    var id: String
+    var displayName: String
+    var imageName: String
+    var countryId: String
+    var countryName: String      // ✅ Add this!
+    var countryFlagEmoji: String // ✅ Add this!
+    var funFact: String
 }
+
 
 // MARK: - Question Model
 struct MathQuestion: Identifiable, Codable {
