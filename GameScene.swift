@@ -150,14 +150,35 @@ class GameScene: SKScene {
     private func setupMathProblem() {
         let isPad = UIDevice.current.userInterfaceIdiom == .pad
 
-        // --- LANDMARK NAME ---
-        landmarkNameLabel = SKLabelNode(fontNamed: "Helvetica-Bold")
+        // Landmark name - keep at top position
+        landmarkNameLabel = SKLabelNode(fontNamed: "ArialRoundedMTBold")
         landmarkNameLabel.text = currentLandmark?.displayName ?? "Landmark"
-        landmarkNameLabel.fontSize = isPad ? 48 : 36
+        landmarkNameLabel.fontSize = 48 // Larger text as in your webapp
         landmarkNameLabel.fontColor = .white
-        landmarkNameLabel.position = CGPoint(x: size.width / 2, y: size.height * 0.85)
+        landmarkNameLabel.position = CGPoint(x: size.width/2, y: size.height * 0.8)
         landmarkNameLabel.zPosition = 5
         addChild(landmarkNameLabel)
+        
+        // Add country label BELOW landmark name
+        let countryInfoNode = SKNode()
+        countryInfoNode.position = CGPoint(x: size.width/2, y: size.height * 0.7)
+        countryInfoNode.zPosition = 5
+        addChild(countryInfoNode)
+        
+        // Country flag emoji
+        countryFlagLabel = SKLabelNode(fontNamed: "AppleColorEmoji")
+        countryFlagLabel.text = currentLandmark?.countryFlagEmoji
+        countryFlagLabel.fontSize = 36
+        countryFlagLabel.position = CGPoint(x: -30, y: 0)
+        countryInfoNode.addChild(countryFlagLabel)
+        
+        // Country name
+        countryNameLabel = SKLabelNode(fontNamed: "Helvetica-Bold")
+        countryNameLabel.text = currentLandmark?.countryName
+        countryNameLabel.fontSize = 36
+        countryNameLabel.fontColor = .white
+        countryNameLabel.position = CGPoint(x: 50, y: 0)
+        countryInfoNode.addChild(countryNameLabel)
 
         // --- QUESTION CONTAINER ---
         let questionBoxWidth: CGFloat = isPad ? 500 : 350
