@@ -5,21 +5,6 @@
       {{ question.num1 }} {{ question.operator }} {{ question.num2 }} =
     </div>
 
-    <v-expand-transition>
-      <div v-if="showHint" class="hint-container mb-2">
-        <v-icon icon="mdi-lightbulb-on" color="amber" class="mr-1"></v-icon>
-        <span>{{ hintText }}</span>
-      </div>
-    </v-expand-transition>
-
-    <!-- Learning Hint (shown after incorrect answer) -->
-    <v-expand-transition>
-      <div v-if="showLearningHint" class="learning-hint-container mb-2">
-        <v-icon icon="mdi-school" color="info" class="mr-1"></v-icon>
-        <span>{{ learningHint }}</span>
-      </div>
-    </v-expand-transition>
-
     <!-- Answer Input Field -->
     <div class="answer-box-container">
       <input
@@ -36,28 +21,36 @@
         :readonly="isMobileDevice()"
       />
     </div>
-    <!-- Feedback Message -->
-    <v-fade-transition>
+    
+    <!-- Feedback Messages and Hints (No extra margins) -->
+    <div class="messages-container">
+      <!-- Learning Hint -->
+      <div v-if="showLearningHint" class="learning-hint-container">
+        <v-icon icon="mdi-school" color="info" class="mr-1"></v-icon>
+        <span>{{ learningHint }}</span>
+      </div>
+
+      <!-- Hint from Power-up -->
+      <div v-if="showHint" class="hint-container">
+        <v-icon icon="mdi-lightbulb-on" color="amber" class="mr-1"></v-icon>
+        <span>{{ hintText }}</span>
+      </div>
+      
+      <!-- Feedback Message -->
       <p v-if="feedbackMessage" :class="feedbackClass" class="feedback-message">
         {{ feedbackMessage }}
       </p>
-    </v-fade-transition>
+    </div>
     
-    <!-- Custom Keyboard -->
-    <Keyboard @input="handleInput" />
-
+    <!-- Keyboard Container - ZERO margin-top when no messages -->
+    <div class="keyboard-container" :style="{ marginTop: hasMessages ? '10px' : '0' }">
+      <Keyboard @input="handleInput" />
+    </div>
+    
     <!-- Submit Button -->
     <v-btn class="submit-btn" color="primary" @click="checkAnswer" :disabled="!userAnswer">
       SUBMIT
     </v-btn>
-
-    <!-- Difficulty Indicator (for debugging) -->
-    <!-- <div class="difficulty-indicator">
-      <small>Difficulty: {{ game.adaptiveDifficulty }} | Mastery: + ({{ game.operatorMastery['+'].level }}) 
-      - ({{ game.operatorMastery['-'].level }}) 
-      × ({{ game.operatorMastery['×'].level }}) 
-      ÷ ({{ game.operatorMastery['÷'].level }})</small>
-    </div> -->
   </div>
 </template>
 
@@ -96,6 +89,11 @@ const learningHint = ref('');
 const answerInput = ref(null);
 
 const question = ref(generateQuestion());
+
+// Computed property to check if we have any messages displayed
+const hasMessages = computed(() => {
+  return showHint.value || showLearningHint.value || feedbackMessage.value;
+});
 
 // Focus input field when component is mounted, but only on non-mobile devices
 onMounted(() => {
@@ -328,16 +326,17 @@ function calculateAnswer() {
   flex-direction: column;
   align-items: center;
   width: 100%;
+  height: 100%;
 }
 
 .problem {
   background: rgba(0, 0, 0, 0.7);
-  padding: 14px 30px;
+  padding: 12px 28px;
   border-radius: 40px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   font-size: 1.6rem;
   font-weight: bold;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
   display: inline-block;
   color: white;
   backdrop-filter: blur(3px);
@@ -346,13 +345,13 @@ function calculateAnswer() {
 .answer-box-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 20px;
   width: 100%;
+  margin-bottom: 5px;
 }
 
 .answer-input {
   width: 40%;
-  height: 45px;
+  height: 40px;
   border-radius: 12px;
   border: none;
   text-align: center;
@@ -361,12 +360,21 @@ function calculateAnswer() {
   background: rgba(255, 255, 255, 0.8);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   color: #333;
-  margin: 0 16px;
+  margin: 0;
   padding: 0 8px;
 }
 
+/* Container for messages and hints - minimal height when empty */
+.messages-container {
+  width: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .feedback-message {
-  margin-top: 8px;
+  margin: 5px 0;
   font-weight: bold;
   font-size: 1.1rem;
 }
@@ -375,23 +383,28 @@ function calculateAnswer() {
   background: rgba(255, 255, 255, 0.9);
   padding: 8px 16px;
   border-radius: 20px;
-  margin-top: 10px;
+  margin: 5px 0;
   color: #FF9800;
   font-weight: medium;
+  max-width: 90%;
 }
 
 .learning-hint-container {
   background: rgba(0, 0, 0, 0.7);
-  padding: 10px 16px;
+  padding: 8px 14px;
   border-radius: 20px;
-  margin-top: 10px;
-  margin-bottom: 16px;
+  margin: 5px 0;
   color: white;
   font-weight: medium;
-  max-width: 80%;
-  margin-left: auto;
-  margin-right: auto;
+  max-width: 90%;
   backdrop-filter: blur(3px);
+  font-size: 0.95rem;
+}
+
+/* No fixed margin to allow dynamic spacing */
+.keyboard-container {
+  width: 100%;
+  transition: margin-top 0.2s ease;
 }
 
 .shake-animation {
@@ -406,14 +419,15 @@ function calculateAnswer() {
 
 .submit-btn {
   min-width: 120px;
-  margin: 8px auto;
-  padding: 8px 32px !important;
-  font-size: 1.1rem !important;
+  margin: 10px auto;
+  padding: 6px 24px !important;
+  font-size: 1rem !important;
   letter-spacing: 1px;
   border-radius: 30px !important;
   background-color: rgba(255, 255, 255, 1) !important;
   color: #333 !important;
   width: 50%;
+  max-width: 180px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -423,5 +437,34 @@ function calculateAnswer() {
 
 .text-error {
   color: #F44336;
+}
+
+/* Mobile-specific adjustments */
+@media (max-height: 700px) {
+  .problem {
+    padding: 10px 20px;
+    font-size: 1.4rem;
+    margin-bottom: 5px;
+  }
+  
+  .answer-input {
+    height: 36px;
+    font-size: 1.3rem;
+  }
+  
+  .learning-hint-container, .hint-container {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+  
+  .submit-btn {
+    padding: 4px 16px !important;
+    margin: 5px auto;
+    font-size: 0.9rem !important;
+  }
+  
+  .feedback-message {
+    font-size: 1rem;
+  }
 }
 </style>
