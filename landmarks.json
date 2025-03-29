@@ -1,0 +1,191 @@
+[
+    {
+        "id": "eiffel_tower",
+        "displayName": "Eiffel Tower",
+        "imageName": "eiffel_tower",
+        "countryId": "france",
+        "countryName": "France",
+        "countryFlagEmoji": "🇫🇷",
+        "funFact": "The Eiffel Tower was built for the 1889 World's Fair and was initially criticized by many French artists."
+    },
+    {
+        "id": "louvre-museum",
+        "displayName": "Louvre Museum",
+        "imageName": "louvre-museum.png",
+        "countryId": "france",
+        "countryName": "France",
+        "countryFlagEmoji": "🇫🇷",
+        "funFact": "The Louvre is the world's largest art museum and houses the Mona Lisa."
+    },
+    {
+        "id": "mont-saint-michel",
+        "displayName": "Mont Saint-Michel",
+        "imageName": "mont-saint-michel.png",
+        "countryId": "france",
+        "countryName": "France",
+        "countryFlagEmoji": "🇫🇷",
+        "funFact": "Mont Saint-Michel is a tidal island that becomes completely surrounded by water during high tides."
+    },
+    {
+        "id": "notre-dame",
+        "displayName": "Notre-Dame Cathedral",
+        "imageName": "notre-dame.png",
+        "countryId": "france",
+        "countryName": "France",
+        "countryFlagEmoji": "🇫🇷",
+        "funFact": "Notre-Dame's iconic rose windows contain much of the original 13th-century glass."
+    },
+    {
+        "id": "palace-of-versailles",
+        "displayName": "Palace of Versailles",
+        "imageName": "palace-of-versailles.png",
+        "countryId": "france",
+        "countryName": "France",
+        "countryFlagEmoji": "🇫🇷",
+        "funFact": "The Palace of Versailles has 700 rooms, 2,000 windows, and 67 staircases."
+    },
+    {
+        "id": "alhambra",
+        "displayName": "Alhambra",
+        "imageName": "alhambra.png",
+        "countryId": "spain",
+        "countryName": "Spain",
+        "countryFlagEmoji": "🇪🇸",
+        "funFact": "The Alhambra's name comes from Arabic meaning 'red castle' due to its reddish walls."
+    },
+    {
+        "id": "park-gell",
+        "displayName": "Park Güell",
+        "imageName": "park-gell.png",
+        "countryId": "spain",
+        "countryName": "Spain",
+        "countryFlagEmoji": "🇪🇸",
+        "funFact": "Park Güell was designed by architect Antoni Gaudí and features his unique mosaic work."
+    },
+    {
+        "id": "plaza-mayor",
+        "displayName": "Plaza Mayor",
+        "imageName": "plaza-mayor.png",
+        "countryId": "spain",
+        "countryName": "Spain",
+        "countryFlagEmoji": "🇪🇸",
+        "funFact": "Plaza Mayor in Madrid has hosted bullfights, markets, and even public executions in its history."
+    },
+    {
+        "id": "sagrada-familia",
+        "displayName": "Sagrada Familia",
+        "imageName": "sagrada-familia.png",
+        "countryId": "spain",
+        "countryName": "Spain",
+        "countryFlagEmoji": "🇪🇸",
+        "funFact": "The Sagrada Familia has been under construction since 1882 and is expected to be completed in 2026."
+    },
+    {
+        "id": "seville-cathedral",
+        "displayName": "Seville Cathedral",
+        "imageName": "seville-cathedral.png",
+        "countryId": "spain",
+        "countryName": "Spain",
+        "countryFlagEmoji": "🇪🇸",
+        "funFact": "Seville Cathedral is the largest Gothic cathedral in the world and contains Columbus's tomb."
+    },
+    {
+        "id": "notre-dame-afrique",
+        "displayName": "Notre Dame d'Afrique",
+        "imageName": "notre-dame-afrique.png",
+        "countryId": "algeria",
+        "countryName": "Algeria",
+        "countryFlagEmoji": "🇩🇿",
+        "funFact": "Notre Dame d'Afrique is a beautiful Roman Catholic basilica in Algiers overlooking the Bay of Algiers."
+    },
+    {
+        "id": "qasr-el-bahdja",
+        "displayName": "Qasr el-Bahdja",
+        "imageName": "qasr-el-bahdja.png",
+        "countryId": "algeria",
+        "countryName": "Algeria",
+        "countryFlagEmoji": "🇩🇿",
+        "funFact": "Qasr el-Bahdja is a palace in Algiers known for its Ottoman architecture and historical significance."
+    },
+    {
+        "id": "m'zaab-valley",
+        "displayName": "M'Zab Valley",
+        "imageName": "m'zaab-valley.png",
+        "countryId": "algeria",
+        "countryName": "Algeria",
+        "countryFlagEmoji": "🇩🇿",
+        "funFact": "The M'Zab Valley is a UNESCO World Heritage site known for its unique Ibadite urban planning and fortified cities."
+    },
+    {
+        "id": "timgad",
+        "displayName": "Timgad",
+        "imageName": "timgad.png",
+        "countryId": "algeria",
+        "countryName": "Algeria",
+        "countryFlagEmoji": "🇩🇿",
+        "funFact": "Timgad was a Roman-Berber city and is one of the best-preserved Roman colonial towns in North Africa."
+    },
+    {
+        "id": "casbah-of-algiers",
+        "displayName": "Casbah of Algiers",
+        "imageName": "casbah-of-algiers.png",
+        "countryId": "algeria",
+        "countryName": "Algeria",
+        "countryFlagEmoji": "🇩🇿",
+        "funFact": "The Casbah of Algiers is a medina (old city) known for its narrow winding streets and Ottoman palaces."
+    },
+    {
+        "id": "golden-gate-bridge",
+        "displayName": "Golden Gate Bridge",
+        "imageName": "golden-gate-bridge.png",
+        "countryId": "usa",
+        "countryName": "United States",
+        "countryFlagEmoji": "🇺🇸",
+        "funFact": "The Golden Gate Bridge's distinctive color is called 'International Orange' and was chosen for visibility in fog."
+    },
+    {
+        "id": "grand-canyon",
+        "displayName": "Grand Canyon",
+        "imageName": "grand-canyon.png",
+        "countryId": "usa",
+        "countryName": "United States",
+        "countryFlagEmoji": "🇺🇸",
+        "funFact": "The Grand Canyon is 277 miles long, up to 18 miles wide, and over a mile deep."
+    },
+    {
+        "id": "statue-of-liberty",
+        "displayName": "Statue of Liberty",
+        "imageName": "statue-of-liberty.png",
+        "countryId": "usa",
+        "countryName": "United States",
+        "countryFlagEmoji": "🇺🇸",
+        "funFact": "The Statue of Liberty was a gift from France to the United States in 1886."
+    },
+    {
+        "id": "times-square",
+        "displayName": "Times Square",
+        "imageName": "times-square.png",
+        "countryId": "usa",
+        "countryName": "United States",
+        "countryFlagEmoji": "🇺🇸",
+        "funFact": "Times Square is named after The New York Times, which moved its headquarters there in 1904."
+    },
+    {
+        "id": "yellowstone-national-park",
+        "displayName": "Yellowstone National Park",
+        "imageName": "yellowstone-national-park.png",
+        "countryId": "usa",
+        "countryName": "United States",
+        "countryFlagEmoji": "🇺🇸",
+        "funFact": "Yellowstone was the world's first national park, established in 1872."
+    },
+    {
+        "id": "great-wall",
+        "displayName": "Great Wall of China",
+        "imageName": "great-wall.png",
+        "countryId": "china",
+        "countryName": "China",
+        "countryFlagEmoji": "🇨🇳",
+        "funFact": "The Great Wall of China stretches over 13,000 miles and took over 2,000 years to build."
+    }
+]

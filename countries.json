@@ -1,0 +1,63 @@
+[
+    {
+        "id": "france",
+        "name": "France",
+        "flagEmoji": "🇫🇷",
+        "landmarks": [
+            "eiffel_tower",
+            "louvre-museum",
+            "mont-saint-michel",
+            "notre-dame",
+            "palace-of-versailles"
+        ],
+        "visitOrder": 1
+    },
+    {
+        "id": "spain",
+        "name": "Spain",
+        "flagEmoji": "🇪🇸",
+        "landmarks": [
+            "alhambra",
+            "park-gell",
+            "plaza-mayor",
+            "sagrada-familia",
+            "seville-cathedral"
+        ],
+        "visitOrder": 2
+    },
+    {
+        "id": "algeria",
+        "name": "Algeria",
+        "flagEmoji": "🇩🇿",
+        "landmarks": [
+            "notre-dame-afrique",
+            "qasr-el-bahdja",
+            "m'zaab-valley",
+            "timgad",
+            "casbah-of-algiers"
+        ],
+        "visitOrder": 3
+    },
+    {
+        "id": "usa",
+        "name": "United States",
+        "flagEmoji": "🇺🇸",
+        "landmarks": [
+            "golden-gate-bridge",
+            "grand-canyon",
+            "statue-of-liberty",
+            "times-square",
+            "yellowstone-national-park"
+        ],
+        "visitOrder": 4
+    },
+    {
+        "id": "china",
+        "name": "China",
+        "flagEmoji": "🇨🇳",
+        "landmarks": [
+            "great-wall"
+        ],
+        "visitOrder": 5
+    }
+]
